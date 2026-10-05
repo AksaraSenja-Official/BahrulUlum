@@ -8,12 +8,11 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- CHART.JS UNTUK GRAFIK -->
+  <!-- CHART.JS & LIBRARIES -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f4fbf7; color: #1e293b; }
@@ -74,10 +73,11 @@
             <p class="text-[10px] font-bold text-amber-600" id="userNameDisplay">Memuat...</p>
           </div>
         </div>
-        <div class="flex gap-2">
+        <div class="flex gap-2 items-center">
           <div class="bg-emerald-50 p-1 rounded-xl flex font-bold text-[10px] text-emerald-800 mr-1 border border-emerald-100">
             <button id="tabBeranda" onclick="gantiTab('beranda')" class="px-3 py-2 rounded-lg bg-white shadow-sm text-emerald-700 transition">Kas Asrama</button>
-            <button id="tabHutang" onclick="gantiTab('hutang')" class="px-3 py-2 rounded-lg hover:text-emerald-900 transition">Buku Pinjaman</button>
+            <button id="tabSiswa" onclick="gantiTab('siswa')" class="px-3 py-2 rounded-lg hover:text-emerald-900 transition">Data Siswa</button>
+            <button id="tabHutang" onclick="gantiTab('hutang')" class="px-3 py-2 rounded-lg hover:text-emerald-900 transition">Pinjaman</button>
           </div>
           <button onclick="prosesLogout()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 text-[10px] font-bold py-2 px-3 rounded-xl transition-all border border-rose-200">
             <i class="fa-solid fa-right-from-bracket"></i> <span class="hidden sm:inline ml-1">Keluar</span>
@@ -227,6 +227,60 @@
         </div>
       </div>
 
+      <!-- MANAJEMEN DATA SISWA (TAMBAH / EDIT / HAPUS) -->
+      <div id="viewSiswa" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-4">
+          <div class="bg-white rounded-[1.5rem] p-5 custom-shadow border border-emerald-100">
+            <h3 class="font-black text-emerald-900 mb-4 flex items-center gap-2 text-sm uppercase tracking-wide"><i class="fa-solid fa-user-plus text-amber-500"></i> Tambah Siswa Baru</h3>
+            <div class="space-y-3.5">
+              <div>
+                <label class="block text-[10px] font-bold text-slate-500 mb-1.5">Pilih Kelas</label>
+                <select id="tambahKelasSiswa" class="w-full bg-white border border-emerald-200 rounded-xl px-3 py-2.5 text-xs focus:ring-2 focus:ring-emerald-500 font-bold text-emerald-900">
+                  <option value="X-1">X-1</option><option value="X-2">X-2</option><option value="X-3">X-3</option><option value="X-4">X-4</option>
+                  <option value="XI-1">XI-1</option><option value="XI-2">XI-2</option><option value="XI-3">XI-3</option><option value="XI-4">XI-4</option>
+                  <option value="XII-1">XII-1</option><option value="XII-2">XII-2</option><option value="XII-3">XII-3</option><option value="XII-4">XII-4</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-slate-500 mb-1.5">Nama Lengkap Siswa</label>
+                <input type="text" id="tambahNamaSiswa" placeholder="Cth: Ahmad Fulan" class="w-full bg-white border border-emerald-200 rounded-xl px-3 py-2.5 text-xs focus:ring-2 focus:ring-emerald-500 font-bold text-emerald-900">
+              </div>
+              <button onclick="tambahSiswaBaru()" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 rounded-xl text-xs transition shadow-md shadow-emerald-600/30">
+                <i class="fa-solid fa-plus mr-1"></i> Tambahkan ke Daftar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-8">
+          <div class="bg-white rounded-[1.5rem] p-5 custom-shadow border border-emerald-100">
+            <div class="flex flex-wrap justify-between items-center gap-3 mb-4">
+              <h3 class="font-black text-emerald-900 text-sm flex items-center gap-2 uppercase tracking-wide"><i class="fa-solid fa-users text-amber-500"></i> Daftar Siswa per Kelas</h3>
+              <select id="pilihKelasLihat" onchange="renderTabelSiswa()" class="bg-white border border-emerald-200 rounded-lg px-3 py-1.5 text-xs font-bold text-emerald-800 focus:ring-2 focus:ring-emerald-500">
+                <option value="X-1">X-1</option><option value="X-2">X-2</option><option value="X-3">X-3</option><option value="X-4">X-4</option>
+                <option value="XI-1">XI-1</option><option value="XI-2">XI-2</option><option value="XI-3">XI-3</option><option value="XI-4">XI-4</option>
+                <option value="XII-1">XII-1</option><option value="XII-2">XII-2</option><option value="XII-3">XII-3</option><option value="XII-4">XII-4</option>
+              </select>
+            </div>
+            
+            <div class="overflow-x-auto custom-scrollbar border border-emerald-50 rounded-xl">
+              <table class="w-full text-left text-[10px]">
+                <thead class="bg-emerald-800 text-amber-400 uppercase font-bold">
+                  <tr>
+                    <th class="px-4 py-3 rounded-tl-xl">No</th>
+                    <th class="px-4 py-3">Nama Siswa</th>
+                    <th class="px-4 py-3 text-center rounded-tr-xl">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="tabelDaftarSiswa" class="divide-y divide-slate-100 bg-white">
+                  <!-- Diisi JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- HUTANG PIUTANG -->
       <div id="viewHutang" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div class="lg:col-span-4">
@@ -272,14 +326,14 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbxHtb7gA8DlPTgtSOdZzKrkjJfiAN4JJcwHPWXwYPfaiNwL0axx8GUyzU3rpO6-8RrEKw/exec";
     
     // 2. KODE BASE64 LOGO MAN IC
-    const logoBase64 = "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";
+    const logoBase64 = "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";
 
-    // 3. DAFTAR NAMA SISWA PER KELAS
-    const dataSiswa = {
+    // 3. DAFTAR NAMA SISWA PER KELAS (DEFAULT / LOCALSTORAGE)
+    let dataSiswa = JSON.parse(localStorage.getItem('dataSiswa_ast')) || {
       "X-1": [
-        "AUDINU ASYGAF AL FAJAR", "LALU MUHAMMAD RIZKY", "M. HIBBAN ALFAYYADH",
-        "M. YAFIQ ZULFADHLIANSYAH", "MUH. FAKHRI ZHAFRAN TABLIG", "MUHAMMAD HAYYI ANSHARI YADI",
-        "MUHAMMAD MAULANA", "MUHAMMAD WAFIYYAN", "RIFQI NAUFAL AZZIYAD", "SYAHZADA EZY BIJADLILLAH"
+        "Audinu Asygaf Al Fajar", "Lalu Muhammad Rizky", "M. Hibban Alfayyadh",
+        "M. Yafiq Zulfadhliansyah", "Muh. Fakhri Zhafran Tablig", "Muhammad Hayyi Anshari Yadi",
+        "Muhammad Maulana", "Muhammad Wafiyyan", "Rifqi Naufal Azziyad", "Syahzada Ezy Bijadlillah"
       ],
       "X-2": [
         "Al Khalifa Bara Damai Gumilarang", "Khalid Rachman Asyakir", "Lalu Qori'ul Hafiz",
@@ -342,14 +396,8 @@
     let roleUser = localStorage.getItem('roleUser');
     let namaUser = localStorage.getItem('namaUser');
     let dataKas = [];
-    let tipeTerpilih = 'Pemasukan';
     let targetTabunganGlobal = 0;
-    
-    // VARIABEL GRAFIK KAS
     let chartKas = null;
-
-    // Inisialisasi awal dropdown nama
-    updateDaftarNama();
 
     window.onload = () => {
       if (roleUser && namaUser) { showApp(); } 
@@ -362,6 +410,7 @@
       document.getElementById('userNameDisplay').innerText = `${namaUser} (${roleUser})`;
       bacaData();
       bacaHutang();
+      renderTabelSiswa();
     }
 
     function panggilAPIJsonp(url, params, callback) {
@@ -404,16 +453,18 @@
     function gantiTab(tab) {
       document.getElementById('viewBeranda').classList.toggle('hidden', tab !== 'beranda');
       document.getElementById('viewProgres').classList.toggle('hidden', tab !== 'beranda');
+      document.getElementById('viewSiswa').classList.toggle('hidden', tab !== 'siswa');
       document.getElementById('viewHutang').classList.toggle('hidden', tab !== 'hutang');
       
-      const tb = document.getElementById('tabBeranda'); const th = document.getElementById('tabHutang');
-      if(tab === 'beranda') {
-        tb.className = "px-3 py-2 rounded-lg bg-white shadow-sm text-emerald-700 transition";
-        th.className = "px-3 py-2 rounded-lg hover:text-emerald-900 transition";
-      } else {
-        th.className = "px-3 py-2 rounded-lg bg-white shadow-sm text-emerald-700 transition";
-        tb.className = "px-3 py-2 rounded-lg hover:text-emerald-900 transition";
-      }
+      const tb = document.getElementById('tabBeranda'); 
+      const ts = document.getElementById('tabSiswa');
+      const th = document.getElementById('tabHutang');
+      
+      tb.className = tab === 'beranda' ? "px-3 py-2 rounded-lg bg-white shadow-sm text-emerald-700 transition" : "px-3 py-2 rounded-lg hover:text-emerald-900 transition";
+      ts.className = tab === 'siswa' ? "px-3 py-2 rounded-lg bg-white shadow-sm text-emerald-700 transition" : "px-3 py-2 rounded-lg hover:text-emerald-900 transition";
+      th.className = tab === 'hutang' ? "px-3 py-2 rounded-lg bg-white shadow-sm text-emerald-700 transition" : "px-3 py-2 rounded-lg hover:text-emerald-900 transition";
+      
+      if(tab === 'siswa') renderTabelSiswa();
     }
 
     // --- FITUR LOGIN ---
@@ -444,16 +495,132 @@
       }
     }
 
-    // --- FITUR DROPDOWN NAMA SISWA ---
+    // === MANAJEMEN DATA SISWA (TAMBAH, EDIT, HAPUS) ===
+    function simpanLocalSiswa() {
+      localStorage.setItem('dataSiswa_ast', JSON.stringify(dataSiswa));
+    }
+
+    function tambahSiswaBaru() {
+      const kelas = document.getElementById('tambahKelasSiswa').value;
+      const nama = document.getElementById('tambahNamaSiswa').value.trim();
+      if(!nama) return alert("Masukkan nama siswa!");
+      
+      if(!dataSiswa[kelas]) dataSiswa[kelas] = [];
+      dataSiswa[kelas].push(nama);
+      simpanLocalSiswa();
+      
+      document.getElementById('tambahNamaSiswa').value = '';
+      alert(`Siswa ${nama} berhasil ditambahkan ke kelas ${kelas}!`);
+      renderTabelSiswa();
+      updateDaftarNama();
+    }
+
+    function renderTabelSiswa() {
+      const kelas = document.getElementById('pilihKelasLihat').value;
+      const tbody = document.getElementById('tabelDaftarSiswa');
+      tbody.innerHTML = '';
+      
+      const list = dataSiswa[kelas] || [];
+      if(list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="3" class="text-center py-6 text-slate-400">Belum ada data siswa di kelas ini.</td></tr>`;
+        return;
+      }
+
+      list.forEach((nama, idx) => {
+        tbody.innerHTML += `
+          <tr class="hover:bg-emerald-50 transition">
+            <td class="px-4 py-2.5 font-bold text-slate-500">${idx + 1}</td>
+            <td class="px-4 py-2.5 font-bold text-slate-800">${nama}</td>
+            <td class="px-4 py-2.5 text-center flex justify-center gap-2">
+              <button onclick="editSiswa('${kelas}', ${idx})" class="text-amber-500 hover:text-amber-600 transition p-1" title="Ubah Nama"><i class="fa-solid fa-pen-to-square"></i></button>
+              <button onclick="hapusSiswa('${kelas}', ${idx})" class="text-rose-400 hover:text-rose-600 transition p-1" title="Hapus"><i class="fa-solid fa-trash-can"></i></button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function editSiswa(kelas, idx) {
+      const currentName = dataSiswa[kelas][idx];
+      const newName = prompt(`Ubah nama siswa untuk kelas ${kelas}:`, currentName);
+      if(newName !== null && newName.trim() !== "") {
+        dataSiswa[kelas][idx] = newName.trim();
+        simpanLocalSiswa();
+        renderTabelSiswa();
+        updateDaftarNama();
+        alert("Nama siswa berhasil diperbarui!");
+      }
+    }
+
+    function hapusSiswa(kelas, idx) {
+      if(confirm(`Yakin ingin menghapus ${dataSiswa[kelas][idx]} dari daftar kelas ${kelas}?`)) {
+        dataSiswa[kelas].splice(idx, 1);
+        simpanLocalSiswa();
+        renderTabelSiswa();
+        updateDaftarNama();
+      }
+    }
+
+    // === FITUR FILTER NAMA SISWA BERDASARKAN TOTAL PEMBAYARAN ===
     function updateDaftarNama() {
       const kelas = document.getElementById('kelasInput').value;
       const selectNama = document.getElementById('namaSiswaInput');
       selectNama.innerHTML = "";
       
-      if(dataSiswa[kelas]) {
-        dataSiswa[kelas].forEach(nama => {
-          selectNama.innerHTML += `<option value="${nama}">${nama}</option>`;
+      const now = new Date();
+      const startYear = now.getMonth() >= 6 ? now.getFullYear() : now.getFullYear() - 1;
+      const currentYearStart = new Date(startYear, 6, 1);
+      
+      let sysStartMonthValue = null;
+      const totalPaidPerSiswa = {};
+
+      dataKas.forEach(item => {
+        if (item.tipe === 'Pemasukan' && item.pembayar && item.pembayar !== "-") {
+          const tgl = new Date(item.tanggal);
+          if (tgl >= currentYearStart) {
+            totalPaidPerSiswa[item.pembayar] = (totalPaidPerSiswa[item.pembayar] || 0) + item.jumlah;
+            const monthVal = tgl.getFullYear() * 12 + tgl.getMonth();
+            if (sysStartMonthValue === null || monthVal < sysStartMonthValue) {
+              sysStartMonthValue = monthVal;
+            }
+          }
+        }
+      });
+
+      const currentMonthValue = now.getFullYear() * 12 + now.getMonth();
+      if (sysStartMonthValue === null || sysStartMonthValue > currentMonthValue) {
+          sysStartMonthValue = currentMonthValue;
+      }
+      
+      const monthsElapsed = currentMonthValue - sysStartMonthValue + 1;
+      const requiredBiasa = monthsElapsed * 5000;
+      const requiredXII = 15000;
+
+      let adaSiswaBelumBayar = false;
+      const listSiswaKelas = dataSiswa[kelas] || [];
+      
+      if(listSiswaKelas.length > 0) {
+        const isKelasXII = kelas.startsWith("XII");
+        
+        listSiswaKelas.forEach(nama => {
+          const paid = totalPaidPerSiswa[nama] || 0;
+          let isLunas = false;
+          
+          if (isKelasXII) {
+            if (paid >= requiredXII) isLunas = true;
+          } else {
+            if (paid >= requiredBiasa) isLunas = true;
+          }
+          
+          if(!isLunas) {
+            selectNama.innerHTML += `<option value="${nama}">${nama}</option>`;
+            adaSiswaBelumBayar = true;
+          }
         });
+      }
+
+      if(!adaSiswaBelumBayar) {
+        selectNama.innerHTML = `<option value="">Semua lunas untuk bulan ini 🎉</option>`;
       }
     }
 
@@ -506,10 +673,10 @@
         document.getElementById('inputTargetGlobal').value = targetTabunganGlobal > 0 ? parseInt(targetTabunganGlobal, 10).toLocaleString('id-ID') : '';
         renderKas();
         updateDropdownBulanCetak();
+        updateDaftarNama();
       });
     }
 
-    // --- LOGIK MERENDER TABEL & GRAFIK ---
     function renderKas() {
       const tbody = document.getElementById('tabelKas');
       tbody.innerHTML = '';
@@ -518,7 +685,6 @@
       if(dataKas.length === 0) {
         tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-400">Belum ada riwayat transaksi.</td></tr>`;
       } else {
-        // Sortir descending untuk Tabel
         let dataSorted = [...dataKas].sort((a,b) => new Date(b.tanggal) - new Date(a.tanggal));
         
         dataSorted.forEach(item => {
@@ -545,20 +711,15 @@
       }
       
       document.getElementById('netBalanceGlobal').innerText = 'Rp ' + saldo.toLocaleString('id-ID');
-      
-      // Memicu Update Grafik
       renderChartGrafik();
     }
     
-    // --- FUNGSI MENGGAMBAR GRAFIK GARIS (PERTUMBUHAN KAS) ---
     function renderChartGrafik() {
         const ctx = document.getElementById('grafikKas').getContext('2d');
-        
         let labels = [];
         let balances = [];
         let currentSaldo = 0;
         
-        // Sortir dari terlama ke terbaru untuk grafik (kiri ke kanan)
         let dataForChart = [...dataKas].sort((a,b) => new Date(a.tanggal) - new Date(b.tanggal));
         
         if(dataForChart.length === 0) {
@@ -569,16 +730,13 @@
                 if(item.tipe === 'Pemasukan') currentSaldo += item.jumlah;
                 else currentSaldo -= item.jumlah;
                 
-                // Format tanggal jadi "Tgl Bln" (Cth: 15 Sep)
                 labels.push(new Date(item.tanggal).toLocaleDateString('id-ID', {day: 'numeric', month: 'short'}));
                 balances.push(currentSaldo);
             });
         }
 
-        // Hancurkan grafik lama jika sudah ada agar tidak menumpuk
         if(chartKas) { chartKas.destroy(); }
         
-        // Bikin grafik baru
         chartKas = new Chart(ctx, {
             type: 'line',
             data: {
@@ -586,15 +744,15 @@
                 datasets: [{
                     label: 'Saldo Kas Asrama (Rp)',
                     data: balances,
-                    borderColor: '#059669', // Emerald-600
-                    backgroundColor: 'rgba(5, 150, 105, 0.1)', // Emerald tipis
+                    borderColor: '#059669',
+                    backgroundColor: 'rgba(5, 150, 105, 0.1)',
                     borderWidth: 3,
-                    pointBackgroundColor: '#f59e0b', // Amber-500
+                    pointBackgroundColor: '#f59e0b',
                     pointBorderColor: '#ffffff',
                     pointRadius: 4,
                     pointHoverRadius: 6,
                     fill: true,
-                    tension: 0.3 // Garis melengkung halus
+                    tension: 0.3
                 }]
             },
             options: {
@@ -603,13 +761,9 @@
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        backgroundColor: '#064e3b', // Emerald-900
-                        titleFont: { family: 'Plus Jakarta Sans', size: 11 },
-                        bodyFont: { family: 'Plus Jakarta Sans', size: 12, weight: 'bold' },
+                        backgroundColor: '#064e3b',
                         callbacks: {
-                            label: function(context) {
-                                return 'Saldo: Rp ' + context.parsed.y.toLocaleString('id-ID');
-                            }
+                            label: function(context) { return 'Saldo: Rp ' + context.parsed.y.toLocaleString('id-ID'); }
                         }
                     }
                 },
@@ -624,10 +778,7 @@
                         grid: { color: '#f1f5f9' }
                     },
                     x: {
-                        ticks: {
-                            font: { family: 'Plus Jakarta Sans', size: 9 },
-                            color: '#64748b'
-                        },
+                        ticks: { font: { family: 'Plus Jakarta Sans', size: 9 }, color: '#64748b' },
                         grid: { display: false }
                     }
                 }
@@ -648,6 +799,7 @@
         ket = `[${document.getElementById('kategoriInput').value}] ${ket}`;
       } else {
         pembayarSiswa = document.getElementById('namaSiswaInput').value;
+        if(!pembayarSiswa) return alert("Semua siswa di kelas ini sudah memenuhi target lunas bulan ini!");
         if(!ket) ket = "Pembayaran Kas Asrama"; 
       }
 
@@ -671,7 +823,7 @@
     }
 
     function hapusKas(rowId) {
-      if(confirm("Yakin hapus transaksi ini dari buku kas?")) {
+      if(confirm("Yakin hapus transaksi ini dari buku kas? (Nama siswa akan muncul kembali di dropdown penagihan)")) {
         panggilAPIJsonp(API_URL, { action: 'hapusTransaksi', row: rowId }, res => {
           if(res.success) bacaData(); else alert("Gagal hapus.");
         });
@@ -686,7 +838,7 @@
       });
     }
 
-    // --- FITUR CETAK PDF SESUAI FORMAT MAN IC ---
+    // --- CETAK PDF ---
     function cetakPDF() {
       const filterVal = document.getElementById('filterBulanCetak').value;
       let dataCetak = dataKas;
@@ -694,16 +846,12 @@
       let defaultNomor = "";
 
       if(filterVal !== 'ALL') {
-          // Filter data berdasarkan bulan yang dipilih
           dataCetak = dataKas.filter(item => {
               const d = new Date(item.tanggal);
               const m = d.getMonth() + 1;
               return `${d.getFullYear()}-${m < 10 ? '0'+m : m}` === filterVal;
           });
-          
           if(dataCetak.length === 0) return alert("Tidak ada data pada bulan tersebut!");
-          
-          // Sesuaikan default nomor surat dengan bulan yang difilter
           const [y, m] = filterVal.split('-');
           defaultNomor = `042/AST-KAS/${romanMonths[parseInt(m)-1]}/${y}`;
       } else {
@@ -738,7 +886,6 @@
       doc.text("Lampiran : -", 15, 57);
       doc.setFont("times", "bold");
       
-      // Tambahkan info bulan pada perihal jika sedang memfilter
       let perihalTeks = "Perihal : Laporan Kas Asrama";
       if(filterVal !== 'ALL') {
           const namaBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
@@ -788,10 +935,8 @@
 
       finalY = doc.lastAutoTable.finalY + 15;
 
-      // Tanda Tangan
       doc.setFont("times", "bold");
       doc.text("Mengetahui,", 105, finalY, { align: "center" });
-
       doc.text("Ketua Asrama", 55, finalY + 10, { align: "center" });
       doc.text("Mirza Aqilah Gazzel", 55, finalY + 35, { align: "center" });
       doc.setLineWidth(0.3); doc.line(30, finalY + 36, 80, finalY + 36); 
@@ -804,7 +949,7 @@
       doc.save(namaFile);
     }
 
-    // --- FITUR HUTANG ---
+    // --- HUTANG PIUTANG ---
     function bacaHutang() {
       document.getElementById('tabelHutang').innerHTML = `<tr><td colspan="4" class="text-center py-8 text-slate-400"><i class="fa-solid fa-spinner animate-spin text-lg mb-2 block"></i> Memuat data pinjaman...</td></tr>`;
       panggilAPIJsonp(API_URL, { action: 'bacaHutang' }, res => {
