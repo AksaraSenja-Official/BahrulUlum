@@ -174,7 +174,11 @@
 
             <div class="bg-white rounded-[1.2rem] p-4 flex flex-col justify-center custom-shadow border border-slate-100">
               <div class="flex justify-between items-center mb-1.5">
-                <span class="text-[9px] text-slate-400 font-bold uppercase flex items-center gap-1.5"><i class="fa-solid fa-trophy text-orange-500"></i> Target Kas</span>
+                <div class="flex items-center gap-2">
+                  <span class="text-[9px] text-slate-400 font-bold uppercase flex items-center gap-1.5"><i class="fa-solid fa-trophy text-orange-500"></i> Target Kas</span>
+                  <!-- Tombol khusus Admin untuk Pengaturan Libur & Tanggal Kas -->
+                  <button id="btnPengaturanKas" onclick="bukaModalPengaturan()" class="hidden bg-slate-100 hover:bg-slate-200 text-slate-500 text-[9px] font-bold px-1.5 py-0.5 rounded transition shadow-sm border border-slate-200"><i class="fa-solid fa-gear"></i> Setelan Libur</button>
+                </div>
                 <span class="font-black text-emerald-600 text-xs" id="targetProgressText">0%</span>
               </div>
               <div class="w-full bg-slate-100 rounded-full h-1.5 mb-2 overflow-hidden">
@@ -403,6 +407,45 @@
       </div>
     </div>
   </div>
+  
+  <!-- ================= MODAL PENGATURAN KAS (ADMIN WEB) ================= -->
+  <div id="modalPengaturan" class="hidden fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm flex justify-center items-center p-4">
+    <div class="bg-white rounded-[1.5rem] w-full max-w-lg p-6 shadow-2xl">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="font-black text-slate-800 text-base"><i class="fa-solid fa-gear text-emerald-500 mr-2"></i> Pengaturan Kas Asrama</h3>
+        <button onclick="tutupModalPengaturan()" class="text-slate-400 hover:text-rose-500 text-xl"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <p class="text-xs text-slate-500 mb-4">Tentukan kapan kas mulai dihitung dan pilih bulan libur agar sistem tidak menambahkan tunggakan pada bulan tersebut.</p>
+
+      <div class="mb-4">
+        <label class="block text-[10px] font-bold text-slate-500 mb-1.5">Mulai Perhitungan (Tagihan) Kas</label>
+        <div class="flex gap-2">
+          <select id="cfgStartBulan" class="w-1/2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold text-slate-700 cursor-pointer">
+             <option value="0">Januari</option><option value="1">Februari</option><option value="2">Maret</option>
+             <option value="3">April</option><option value="4">Mei</option><option value="5">Juni</option>
+             <option value="6">Juli</option><option value="7">Agustus</option><option value="8">September</option>
+             <option value="9">Oktober</option><option value="10">November</option><option value="11">Desember</option>
+          </select>
+          <select id="cfgStartTahun" class="w-1/2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold text-slate-700 cursor-pointer">
+             <option value="2025">2025</option><option value="2026">2026</option><option value="2027">2027</option>
+             <option value="2028">2028</option><option value="2029">2029</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="mb-5">
+        <label class="block text-[10px] font-bold text-slate-500 mb-2">Bulan Libur (Tunggakan Dijeda)</label>
+        <div class="grid grid-cols-3 sm:grid-cols-4 gap-2" id="cfgLiburContainer">
+           <!-- Dihasilkan oleh JavaScript -->
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2">
+        <button onclick="tutupModalPengaturan()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg text-xs font-bold hover:bg-slate-200 transition">Batal</button>
+        <button onclick="simpanPengaturan()" id="btnSimpanPengaturan" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-xs font-bold hover:bg-emerald-700 transition shadow-lg shadow-emerald-500/30">Simpan Setelan</button>
+      </div>
+    </div>
+  </div>
 
   <!-- ================= MODAL PENCATATAN MOBILE ================= -->
   <div id="modalCatat" class="hidden fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm flex justify-center items-end sm:items-center">
@@ -469,7 +512,7 @@
       "25000177": "Bendahara I (M. Briyan Al Farizzi)",
       "25000412": "Bendahara II (Permana Aji Banyu Sugara)",
       "250002627": "Pembina Asrama",
-      "0101104202": "Admin Web" // <-- PIN BARU UNTUK ADMIN WEB (Ubah jika perlu)
+      "88888888": "Admin Web" 
     };
 
     let currentJadwalData = { adzan: [], imam: [], bulan: "", tahun: "" };
@@ -479,6 +522,11 @@
     let rawData = []; let hutangData = []; 
     let masterSiswaCache = {}; let masterPetugasCache = {};
     
+    // VARIABLE UNTUK PENGATURAN KAS OTOMATIS
+    let configLiburCache = [11]; // default libur desember (index 11)
+    let configStartBulanCache = 9; // default mulai oktober (index 9)
+    let configStartTahunCache = 2026; 
+
     let targetTabunganGlobal = 0; let tipeTerpilih = 'Pemasukan';
     let financialChartInstance = null; let donutChartInstance = null; 
     let currentFilteredData = []; let currentPage = 1; const rowsPerPage = 5; 
@@ -517,51 +565,40 @@
       }
     }
 
-    // ===============================================
-    // FUNGSI UNTUK MENGATUR HAK AKSES TAMPILAN MENU
-    // ===============================================
     function terapkanHakAksesRole() {
       const roleStr = currentUserRole.toLowerCase();
       const isAdmin = roleStr.includes("admin web");
       const isBendahara = roleStr.includes("bendahara");
       
-      // Elemen-elemen Menu Desktop
       const elBeranda = document.getElementById('tabBeranda');
       const elHutang = document.getElementById('tabHutang');
       const elJadwal = document.getElementById('tabJadwal');
       const elSiswa = document.getElementById('btnKelolaSiswaDesk');
+      const elSetelanKas = document.getElementById('btnPengaturanKas');
       
-      // Elemen-elemen Menu Mobile
       const elBerandaMob = document.getElementById('tabBerandaMob');
       const elHutangMob = document.getElementById('tabHutangMob');
       const elJadwalMob = document.getElementById('tabJadwalMob');
       const elSiswaMob = document.getElementById('tabSiswaMob');
-      
       const elFab = document.getElementById('fabCatat');
 
-      // Fungsi Helper untuk Sembunyikan/Tampilkan
-      const toggleView = (el, isShow) => { 
-        if(el) el.style.display = isShow ? '' : 'none'; 
-      };
+      const toggleView = (el, isShow) => { if(el) el.style.display = isShow ? '' : 'none'; };
+
+      // Khusus tombol pengaturan Kas hanya untuk Admin Web
+      toggleView(elSetelanKas, isAdmin);
 
       if (isAdmin) {
-        // Tampilkan semua fitur untuk Admin
         toggleView(elBeranda, true); toggleView(elHutang, true); toggleView(elJadwal, true); toggleView(elSiswa, true);
         toggleView(elBerandaMob, true); toggleView(elHutangMob, true); toggleView(elJadwalMob, true); toggleView(elSiswaMob, true);
-        toggleView(elFab, true);
-        gantiTabApp('beranda');
+        toggleView(elFab, true); gantiTabApp('beranda');
       } else if (isBendahara) {
-        // Hanya Kas dan Hutang untuk Bendahara
         toggleView(elBeranda, true); toggleView(elHutang, true); toggleView(elJadwal, false); toggleView(elSiswa, false);
         toggleView(elBerandaMob, true); toggleView(elHutangMob, true); toggleView(elJadwalMob, false); toggleView(elSiswaMob, false);
-        toggleView(elFab, true);
-        gantiTabApp('beranda');
+        toggleView(elFab, true); gantiTabApp('beranda');
       } else {
-        // Hanya Jadwal dan Siswa untuk Sekretaris, Ketua, Wakil, Pembina
         toggleView(elBeranda, false); toggleView(elHutang, false); toggleView(elJadwal, true); toggleView(elSiswa, true);
         toggleView(elBerandaMob, false); toggleView(elHutangMob, false); toggleView(elJadwalMob, true); toggleView(elSiswaMob, true);
-        toggleView(elFab, false); 
-        gantiTabApp('jadwal');
+        toggleView(elFab, false); gantiTabApp('jadwal');
       }
     }
 
@@ -570,8 +607,7 @@
       document.getElementById('mainApp').classList.remove('hidden');
       document.getElementById('userNameDisplay').innerText = currentUserRole;
       
-      terapkanHakAksesRole(); // <-- Terapkan sistem Role (Pembagian Akses)
-      
+      terapkanHakAksesRole(); 
       fetchSiswaAndData(); fetchHutangData(); 
     }
 
@@ -591,66 +627,42 @@
     // LOGIK GENERATOR JADWAL ACAK / RANDOM
     // ==========================================
     function acakDaftar(array) {
-      let daftarAcak = [...array];
-      let curId = daftarAcak.length;
+      let daftarAcak = [...array]; let curId = daftarAcak.length;
       while (0 !== curId) {
-          let randId = Math.floor(Math.random() * curId);
-          curId -= 1;
-          let tmp = daftarAcak[curId];
-          daftarAcak[curId] = daftarAcak[randId];
-          daftarAcak[randId] = tmp;
+          let randId = Math.floor(Math.random() * curId); curId -= 1;
+          let tmp = daftarAcak[curId]; daftarAcak[curId] = daftarAcak[randId]; daftarAcak[randId] = tmp;
       }
       return daftarAcak;
     }
 
     function prosesGenerateJadwal() {
       if(!masterPetugasCache || !masterPetugasCache["Adzan"]) return alert("Tunggu sebentar, sedang memuat data nama petugas...");
-      
-      const bln = parseInt(document.getElementById('jBulan').value);
-      const thn = parseInt(document.getElementById('jTahun').value);
-      
-      currentJadwalData.bulan = NAMA_BULAN[bln];
-      currentJadwalData.tahun = thn;
+      const bln = parseInt(document.getElementById('jBulan').value); const thn = parseInt(document.getElementById('jTahun').value);
+      currentJadwalData.bulan = NAMA_BULAN[bln]; currentJadwalData.tahun = thn;
       
       let arrayAdzan = acakDaftar(masterPetugasCache["Adzan"]);
       let arrayImam = acakDaftar(masterPetugasCache["Imam"]);
       let arrayJumat = acakDaftar(masterPetugasCache["Imam Jumat Subuh"]);
 
-      let current = new Date(thn, bln, 1);
-      let targetEnd = new Date(thn, bln + 1, 0);
-      
-      let adzanIdx = 0, imamIdx = 0, jumatIdx = 0;
-      let jadwalAdzan = []; let jadwalImam = [];
+      let current = new Date(thn, bln, 1); let targetEnd = new Date(thn, bln + 1, 0);
+      let adzanIdx = 0, imamIdx = 0, jumatIdx = 0; let jadwalAdzan = []; let jadwalImam = [];
       
       while (current <= targetEnd) {
           let day = current.getDay(); 
           let dateStr = `${NAMA_HARI[day]}, ${current.getDate()} ${NAMA_BULAN[current.getMonth()]} ${current.getFullYear()}`;
-          
-          let rowAdzan = { tanggal: dateStr, isJumat: day === 5 };
-          let rowImam = { tanggal: dateStr, isJumat: day === 5 };
+          let rowAdzan = { tanggal: dateStr, isJumat: day === 5 }; let rowImam = { tanggal: dateStr, isJumat: day === 5 };
           
           rowAdzan.subuh = arrayAdzan[adzanIdx++ % arrayAdzan.length];
-          if (day === 5) rowImam.subuh = arrayJumat[jumatIdx++ % arrayJumat.length];
-          else rowImam.subuh = arrayImam[imamIdx++ % arrayImam.length];
+          if (day === 5) rowImam.subuh = arrayJumat[jumatIdx++ % arrayJumat.length]; else rowImam.subuh = arrayImam[imamIdx++ % arrayImam.length];
+          rowAdzan.ashar = arrayAdzan[adzanIdx++ % arrayAdzan.length]; rowImam.ashar = arrayImam[imamIdx++ % arrayImam.length];
+          rowAdzan.maghrib = arrayAdzan[adzanIdx++ % arrayAdzan.length]; rowImam.maghrib = arrayImam[imamIdx++ % arrayImam.length];
+          rowAdzan.isya = arrayAdzan[adzanIdx++ % arrayAdzan.length]; rowImam.isya = arrayImam[imamIdx++ % arrayImam.length];
           
-          rowAdzan.ashar = arrayAdzan[adzanIdx++ % arrayAdzan.length];
-          rowImam.ashar = arrayImam[imamIdx++ % arrayImam.length];
-          rowAdzan.maghrib = arrayAdzan[adzanIdx++ % arrayAdzan.length];
-          rowImam.maghrib = arrayImam[imamIdx++ % arrayImam.length];
-          rowAdzan.isya = arrayAdzan[adzanIdx++ % arrayAdzan.length];
-          rowImam.isya = arrayImam[imamIdx++ % arrayImam.length];
-          
-          jadwalAdzan.push(rowAdzan);
-          jadwalImam.push(rowImam);
-          
-          current.setDate(current.getDate() + 1);
+          jadwalAdzan.push(rowAdzan); jadwalImam.push(rowImam); current.setDate(current.getDate() + 1);
       }
       
-      currentJadwalData.adzan = jadwalAdzan;
-      currentJadwalData.imam = jadwalImam;
-      
-      document.getElementById('jadwalResultContainer').classList.remove('hidden');
-      renderJadwalTable();
+      currentJadwalData.adzan = jadwalAdzan; currentJadwalData.imam = jadwalImam;
+      document.getElementById('jadwalResultContainer').classList.remove('hidden'); renderJadwalTable();
     }
 
     function switchJadwalTab(tab) {
@@ -658,58 +670,28 @@
       document.getElementById('tabAdzanView').className = tab === 'adzan' ? 'px-4 py-2 font-bold text-emerald-600 border-b-2 border-emerald-500 transition' : 'px-4 py-2 font-bold text-slate-400 hover:text-slate-600 transition';
       document.getElementById('tabImamView').className = tab === 'imam' ? 'px-4 py-2 font-bold text-emerald-600 border-b-2 border-emerald-500 transition' : 'px-4 py-2 font-bold text-slate-400 hover:text-slate-600 transition';
       document.getElementById('lblCetak').innerText = tab === 'adzan' ? 'Adzan' : 'Imam';
-      
       const trHead = document.getElementById('jadwalHeadTr');
-      if (tab === 'adzan') trHead.className = "text-slate-800 uppercase font-bold border-b-2 border-slate-200 bg-[#e0f2fe]";
-      else trHead.className = "text-slate-800 uppercase font-bold border-b-2 border-slate-200 bg-[#dcfce7]";
-      
+      if (tab === 'adzan') trHead.className = "text-slate-800 uppercase font-bold border-b-2 border-slate-200 bg-[#e0f2fe]"; else trHead.className = "text-slate-800 uppercase font-bold border-b-2 border-slate-200 bg-[#dcfce7]";
       renderJadwalTable();
     }
 
     function renderJadwalTable() {
       const data = activeJadwalTab === 'adzan' ? currentJadwalData.adzan : currentJadwalData.imam;
-      const tbody = document.getElementById('jadwalBodyTabel');
-      tbody.innerHTML = '';
-      
+      const tbody = document.getElementById('jadwalBodyTabel'); tbody.innerHTML = '';
       data.forEach(row => {
           let highlightSubuh = (activeJadwalTab === 'imam' && row.isJumat) ? 'bg-yellow-200 font-bold' : '';
-          tbody.innerHTML += `
-             <tr class="hover:bg-slate-50 transition-colors">
-               <td class="px-4 py-2.5 border-r border-slate-100 whitespace-nowrap text-slate-600">${row.tanggal}</td>
-               <td class="px-4 py-2.5 border-r border-slate-100 text-center text-slate-800 ${highlightSubuh}">${row.subuh}</td>
-               <td class="px-4 py-2.5 border-r border-slate-100 text-center text-slate-800">${row.ashar}</td>
-               <td class="px-4 py-2.5 border-r border-slate-100 text-center text-slate-800">${row.maghrib}</td>
-               <td class="px-4 py-2.5 text-center text-slate-800">${row.isya}</td>
-             </tr>
-          `;
+          tbody.innerHTML += `<tr class="hover:bg-slate-50 transition-colors"><td class="px-4 py-2.5 border-r border-slate-100 whitespace-nowrap text-slate-600">${row.tanggal}</td><td class="px-4 py-2.5 border-r border-slate-100 text-center text-slate-800 ${highlightSubuh}">${row.subuh}</td><td class="px-4 py-2.5 border-r border-slate-100 text-center text-slate-800">${row.ashar}</td><td class="px-4 py-2.5 border-r border-slate-100 text-center text-slate-800">${row.maghrib}</td><td class="px-4 py-2.5 text-center text-slate-800">${row.isya}</td></tr>`;
       });
     }
 
     function exportJadwalPDF() {
       if (!currentJadwalData.adzan.length) return alert("Sila buat jadwal terlebih dahulu!");
       const { jsPDF } = window.jspdf; const doc = new jsPDF('p', 'mm', 'a4');
-      
-      const isAdzan = activeJadwalTab === 'adzan';
-      const title = isAdzan ? "JADWAL AZAN" : "JADWAL IMAM";
-      const subtitle = `BULAN ${currentJadwalData.bulan.toUpperCase()} ${currentJadwalData.tahun}`;
-      
+      const isAdzan = activeJadwalTab === 'adzan'; const title = isAdzan ? "JADWAL AZAN" : "JADWAL IMAM"; const subtitle = `BULAN ${currentJadwalData.bulan.toUpperCase()} ${currentJadwalData.tahun}`;
       doc.setFont("helvetica", "bold"); doc.setFontSize(14); doc.text(title, 105, 20, { align: "center" }); doc.text(subtitle, 105, 26, { align: "center" });
-      
       const tableData = (isAdzan ? currentJadwalData.adzan : currentJadwalData.imam).map(row => [ row.tanggal, row.subuh, row.ashar, row.maghrib, row.isya ]);
       const headColor = isAdzan ? [155, 194, 230] : [169, 208, 142]; 
-      
-      doc.autoTable({
-          startY: 35,
-          head: [['Hari / Tanggal', 'Subuh', 'Ashar', 'Maghrib', "Isya'"]],
-          body: tableData,
-          theme: 'grid',
-          headStyles: { fillColor: headColor, textColor: [0,0,0], fontStyle: 'bold', lineColor: [0,0,0], lineWidth: 0.2, halign: 'center' },
-          bodyStyles: { lineColor: [0,0,0], lineWidth: 0.2, textColor: [0,0,0], halign: 'center' },
-          columnStyles: { 0: { halign: 'left' } },
-          didParseCell: function(data) {
-              if (!isAdzan && data.section === 'body' && data.column.index === 1 && data.row.raw[0].startsWith('Jumat')) data.cell.styles.fillColor = [255, 255, 0];
-          }
-      });
+      doc.autoTable({ startY: 35, head: [['Hari / Tanggal', 'Subuh', 'Ashar', 'Maghrib', "Isya'"]], body: tableData, theme: 'grid', headStyles: { fillColor: headColor, textColor: [0,0,0], fontStyle: 'bold', lineColor: [0,0,0], lineWidth: 0.2, halign: 'center' }, bodyStyles: { lineColor: [0,0,0], lineWidth: 0.2, textColor: [0,0,0], halign: 'center' }, columnStyles: { 0: { halign: 'left' } }, didParseCell: function(data) { if (!isAdzan && data.section === 'body' && data.column.index === 1 && data.row.raw[0].startsWith('Jumat')) data.cell.styles.fillColor = [255, 255, 0]; } });
       doc.save(`${title}_${currentJadwalData.bulan}_${currentJadwalData.tahun}.pdf`);
     }
 
@@ -726,6 +708,12 @@
           panggilAPIJsonp(API_URL, { action: 'bacaData' }, function(response) {
             rawData = response.transaksi || [];
             targetTabunganGlobal = response.target || 0;
+            
+            // Tarik data konfigurasi start bulan & libur
+            configLiburCache = response.libur !== undefined ? response.libur : [11];
+            configStartBulanCache = response.startBulan !== undefined ? response.startBulan : 9;
+            configStartTahunCache = response.startTahun !== undefined ? response.startTahun : 2026;
+            
             document.getElementById('targetInput').value = targetTabunganGlobal ? parseInt(targetTabunganGlobal, 10).toLocaleString('id-ID') : '';
             updateDropdownFilterOptions();
             renderSemua();
@@ -735,98 +723,131 @@
     }
 
     function renderKelasDropdown() {
-      const selectDesk = document.getElementById('kelasInput');
-      const selectMob = document.getElementById('m_kelasInput');
-      let html = '<option value="">Pilih...</option>';
-      for (let k in masterSiswaCache) html += `<option value="${k}">${k}</option>`;
+      const selectDesk = document.getElementById('kelasInput'); const selectMob = document.getElementById('m_kelasInput');
+      let html = '<option value="">Pilih...</option>'; for (let k in masterSiswaCache) html += `<option value="${k}">${k}</option>`;
       selectDesk.innerHTML = html; selectMob.innerHTML = html;
+    }
+
+    // MODAL PENGATURAN KAS & LIBUR (ADMIN)
+    function bukaModalPengaturan() {
+      document.getElementById('modalPengaturan').classList.remove('hidden');
+      document.getElementById('cfgStartBulan').value = configStartBulanCache;
+      document.getElementById('cfgStartTahun').value = configStartTahunCache;
+
+      const container = document.getElementById('cfgLiburContainer');
+      container.innerHTML = '';
+      NAMA_BULAN.forEach((bln, index) => {
+        const isChecked = configLiburCache.includes(index) ? 'checked' : '';
+        container.innerHTML += `
+          <label class="flex items-center space-x-2 text-[10px] font-semibold text-slate-700 cursor-pointer bg-slate-50 p-1.5 rounded-lg border border-slate-100">
+            <input type="checkbox" value="${index}" class="chk-libur rounded text-emerald-500 focus:ring-emerald-500" ${isChecked}>
+            <span>${bln}</span>
+          </label>
+        `;
+      });
+    }
+
+    function tutupModalPengaturan() { document.getElementById('modalPengaturan').classList.add('hidden'); }
+
+    function simpanPengaturan() {
+       const checkboxes = document.querySelectorAll('.chk-libur:checked');
+       let liburArr = []; checkboxes.forEach(chk => liburArr.push(parseInt(chk.value)));
+
+       const sBulan = document.getElementById('cfgStartBulan').value;
+       const sTahun = document.getElementById('cfgStartTahun').value;
+
+       const btn = document.getElementById('btnSimpanPengaturan');
+       btn.innerText = "Menyimpan..."; btn.disabled = true;
+
+       panggilAPIJsonp(API_URL, {
+          action: 'simpanPengaturan',
+          libur: JSON.stringify(liburArr),
+          startBulan: sBulan,
+          startTahun: sTahun
+       }, res => {
+          btn.innerText = "Simpan Setelan"; btn.disabled = false;
+          if(res.success) {
+             configLiburCache = liburArr;
+             configStartBulanCache = parseInt(sBulan);
+             configStartTahunCache = parseInt(sTahun);
+             tutupModalPengaturan();
+             updatePembayarDropdown(false); updatePembayarDropdown(true);
+             alert('Pengaturan Libur & Waktu Kas berhasil disimpan!');
+          } else { alert('Gagal menyimpan pengaturan.'); }
+       });
+    }
+
+    function hitungBulanWajib(sYear, sMonth, cYear, cMonth, liburArr) {
+      let count = 0; let cur = new Date(sYear, sMonth, 1); let end = new Date(cYear, cMonth, 1);
+      if (cur > end) return 0; 
+      while (cur <= end) {
+        if (!liburArr.includes(cur.getMonth())) count++;
+        cur.setMonth(cur.getMonth() + 1);
+      }
+      return count;
     }
 
     // MODAL EDIT SISWA
     function bukaModalSiswa() {
       document.getElementById('modalSiswa').classList.remove('hidden');
       const drp = document.getElementById('editKelasDropdown');
-      drp.innerHTML = '<option value="">Pilih Kelas...</option>';
-      for(let k in masterSiswaCache) drp.innerHTML += `<option value="${k}">${k}</option>`;
+      drp.innerHTML = '<option value="">Pilih Kelas...</option>'; for(let k in masterSiswaCache) drp.innerHTML += `<option value="${k}">${k}</option>`;
       document.getElementById('editNamaSiswaTextarea').value = "";
     }
     function tutupModalSiswa() { document.getElementById('modalSiswa').classList.add('hidden'); }
     function loadNamaKeTextarea() {
-      const drp = document.getElementById('editKelasDropdown').value;
-      const txt = document.getElementById('editNamaSiswaTextarea');
-      if(!drp) { txt.value = ""; return; }
-      if(masterSiswaCache[drp]) txt.value = masterSiswaCache[drp].join('\n');
+      const drp = document.getElementById('editKelasDropdown').value; const txt = document.getElementById('editNamaSiswaTextarea');
+      if(!drp) { txt.value = ""; return; } if(masterSiswaCache[drp]) txt.value = masterSiswaCache[drp].join('\n');
     }
     function simpanMasterSiswa() {
-      const drp = document.getElementById('editKelasDropdown').value;
-      if(!drp) return alert("Sila pilih kelas untuk disimpan.");
+      const drp = document.getElementById('editKelasDropdown').value; if(!drp) return alert("Sila pilih kelas untuk disimpan.");
       const txtValue = document.getElementById('editNamaSiswaTextarea').value;
       let namaArray = txtValue.split('\n').map(n => n.trim()).filter(n => n !== "");
       masterSiswaCache[drp] = namaArray;
       
-      const btn = document.getElementById('btnSimpanSiswa');
-      btn.innerText = "Menyimpan..."; btn.disabled = true;
-
+      const btn = document.getElementById('btnSimpanSiswa'); btn.innerText = "Menyimpan..."; btn.disabled = true;
       panggilAPIJsonp(API_URL, { action: 'simpanSiswa', dataSiswa: JSON.stringify(masterSiswaCache) }, function(res) {
         btn.innerText = "Simpan Perubahan"; btn.disabled = false;
-        if(res.success) {
-          alert("Senarai siswa bagi kelas " + drp + " berjaya disimpan!");
-          renderKelasDropdown(); updatePembayarDropdown(false); updatePembayarDropdown(true);
-        } else alert("Gagal menyimpan data.");
+        if(res.success) { alert("Senarai siswa berjaya disimpan!"); renderKelasDropdown(); updatePembayarDropdown(false); updatePembayarDropdown(true); } else alert("Gagal menyimpan data.");
       });
     }
 
     // MODAL EDIT PETUGAS
     function bukaModalPetugas() {
-      document.getElementById('modalPetugas').classList.remove('hidden');
-      document.getElementById('editKategoriPetugas').value = "Adzan";
-      loadPetugasKeTextarea();
+      document.getElementById('modalPetugas').classList.remove('hidden'); document.getElementById('editKategoriPetugas').value = "Adzan"; loadPetugasKeTextarea();
     }
     function tutupModalPetugas() { document.getElementById('modalPetugas').classList.add('hidden'); }
     function loadPetugasKeTextarea() {
-      const kat = document.getElementById('editKategoriPetugas').value;
-      const txt = document.getElementById('editNamaPetugasTextarea');
+      const kat = document.getElementById('editKategoriPetugas').value; const txt = document.getElementById('editNamaPetugasTextarea');
       if(masterPetugasCache[kat]) txt.value = masterPetugasCache[kat].join('\n');
     }
     function simpanMasterPetugas() {
-      const kat = document.getElementById('editKategoriPetugas').value;
-      const txtValue = document.getElementById('editNamaPetugasTextarea').value;
-      let namaArray = txtValue.split('\n').map(n => n.trim()).filter(n => n !== "");
-      masterPetugasCache[kat] = namaArray;
-      
-      const btn = document.getElementById('btnSimpanPetugas');
-      btn.innerText = "Menyimpan..."; btn.disabled = true;
-
+      const kat = document.getElementById('editKategoriPetugas').value; const txtValue = document.getElementById('editNamaPetugasTextarea').value;
+      let namaArray = txtValue.split('\n').map(n => n.trim()).filter(n => n !== ""); masterPetugasCache[kat] = namaArray;
+      const btn = document.getElementById('btnSimpanPetugas'); btn.innerText = "Menyimpan..."; btn.disabled = true;
       panggilAPIJsonp(API_URL, { action: 'simpanPetugas', dataPetugas: JSON.stringify(masterPetugasCache) }, function(res) {
         btn.innerText = "Simpan Petugas"; btn.disabled = false;
-        if(res.success) alert("Daftar " + kat + " berhasil disimpan!");
-        else alert("Gagal menyimpan data.");
+        if(res.success) alert("Daftar " + kat + " berhasil disimpan!"); else alert("Gagal menyimpan data.");
       });
     }
 
-    // ===============================================
     // LOGIK HIDE NAMA PEMBAYAR DAN TUNGGAKAN OTOMATIS
-    // ===============================================
     function updatePembayarDropdown(isMobile) {
-      const pfx = isMobile ? 'm_' : '';
-      const selectedKelas = document.getElementById(pfx + 'kelasInput').value;
-      const elPembayar = document.getElementById(pfx + 'pembayarInput');
-
+      const pfx = isMobile ? 'm_' : ''; const selectedKelas = document.getElementById(pfx + 'kelasInput').value; const elPembayar = document.getElementById(pfx + 'pembayarInput');
       if (!selectedKelas) { elPembayar.innerHTML = '<option value="">Pilih Kelas Dahulu</option>'; return; }
 
+      // LOGIK OTOMATIS BULAN BERJALAN & MEMBACA LIBUR
+      const startDateLimit = new Date(configStartTahunCache, configStartBulanCache, 1); 
       const now = new Date();
-      let startYear = now.getMonth() >= 6 ? now.getFullYear() : now.getFullYear() - 1;
-      let startOfAcademicYear = new Date(startYear, 6, 1); 
       
-      // LOGIK OTOMATIS BULAN BERJALAN: Menghitung secara mandiri sesuai dengan sistem komputer.
-      const monthsElapsed = (now.getFullYear() - startYear) * 12 + now.getMonth() - 6 + 1;
+      const monthsElapsed = hitungBulanWajib(configStartTahunCache, configStartBulanCache, now.getFullYear(), now.getMonth(), configLiburCache);
       const targetPerBulan = 5000;
       const currentTargetXXI = monthsElapsed * targetPerBulan; 
-      const targetXII = 15000;
+      const targetXII = 15000; // Target statis kelas XII
 
       let payments = {};
       rawData.forEach(item => {
-        if (item.tipe === 'Pemasukan' && item.pembayar && new Date(item.tanggal) >= startOfAcademicYear) {
+        if (item.tipe === 'Pemasukan' && item.pembayar && new Date(item.tanggal) >= startDateLimit) {
           payments[item.pembayar] = (payments[item.pembayar] || 0) + Number(item.jumlah);
         }
       });
@@ -842,9 +863,13 @@
                html += `<option value="${nama}">${nama} (Sisa: Rp ${(targetXII - totalPaid).toLocaleString('id-ID')})</option>`;
             }
           } else {
-            // Tunggakan dihitung otomatis secara realtime bulan demi bulan
-            if (totalPaid < currentTargetXXI) {
-               html += `<option value="${nama}">${nama} (Tunggakan: Rp ${(currentTargetXXI - totalPaid).toLocaleString('id-ID')})</option>`;
+            // Tunggakan dihitung otomatis secara realtime (mengabaikan bulan libur)
+            if (monthsElapsed > 0) {
+               if (totalPaid < currentTargetXXI) {
+                  html += `<option value="${nama}">${nama} (Tunggakan: Rp ${(currentTargetXXI - totalPaid).toLocaleString('id-ID')})</option>`;
+               }
+            } else {
+               html += `<option value="${nama}">${nama}</option>`; // Jika belum dimulai
             }
           }
         });
@@ -888,21 +913,15 @@
 
     function setTipe(tipe, isModal = false) {
       tipeTerpilih = tipe;
-      const pfx = isModal ? 'm_' : '';
-      const bM = document.getElementById(pfx+'btnMasuk'); const bK = document.getElementById(pfx+'btnKeluar'); 
-      const wKat = document.getElementById(pfx+'wadahKategori'); const wPem = document.getElementById(pfx+'wadahPembayar');
-      const lblKet = document.getElementById(pfx+'labelKetOpsional');
+      const pfx = isModal ? 'm_' : ''; const bM = document.getElementById(pfx+'btnMasuk'); const bK = document.getElementById(pfx+'btnKeluar'); 
+      const wKat = document.getElementById(pfx+'wadahKategori'); const wPem = document.getElementById(pfx+'wadahPembayar'); const lblKet = document.getElementById(pfx+'labelKetOpsional');
       
       if(tipe === 'Pemasukan') {
-        bM.className = "py-2 text-xs font-bold rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-700 cursor-pointer";
-        bK.className = "py-2 text-xs font-bold rounded-xl border border-slate-200 text-slate-500 cursor-pointer";
-        wKat.classList.add('hidden'); wPem.classList.remove('hidden'); wPem.classList.add('flex');
-        if(lblKet) lblKet.classList.remove('hidden'); 
+        bM.className = "py-2 text-xs font-bold rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-700 cursor-pointer"; bK.className = "py-2 text-xs font-bold rounded-xl border border-slate-200 text-slate-500 cursor-pointer";
+        wKat.classList.add('hidden'); wPem.classList.remove('hidden'); wPem.classList.add('flex'); if(lblKet) lblKet.classList.remove('hidden'); 
       } else {
-        bK.className = "py-2 text-xs font-bold rounded-xl border-2 border-rose-500 bg-rose-50 text-rose-700 cursor-pointer";
-        bM.className = "py-2 text-xs font-bold rounded-xl border border-slate-200 text-slate-500 cursor-pointer";
-        wKat.classList.remove('hidden'); wPem.classList.add('hidden'); wPem.classList.remove('flex');
-        if(lblKet) lblKet.classList.add('hidden'); 
+        bK.className = "py-2 text-xs font-bold rounded-xl border-2 border-rose-500 bg-rose-50 text-rose-700 cursor-pointer"; bM.className = "py-2 text-xs font-bold rounded-xl border border-slate-200 text-slate-500 cursor-pointer";
+        wKat.classList.remove('hidden'); wPem.classList.add('hidden'); wPem.classList.remove('flex'); if(lblKet) lblKet.classList.add('hidden'); 
       }
     }
 
@@ -920,8 +939,7 @@
       var config = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 1000 };
       function acak(min, max) { return Math.random() * (max - min) + min; }
       var interval = setInterval(function() {
-        var sisaWaktu = selesai - Date.now();
-        if (sisaWaktu <= 0) return clearInterval(interval);
+        var sisaWaktu = selesai - Date.now(); if (sisaWaktu <= 0) return clearInterval(interval);
         var pCount = 50 * (sisaWaktu / durasi);
         confetti(Object.assign({}, config, { particleCount: pCount, origin: { x: acak(0.1, 0.3), y: Math.random() - 0.2 } }));
         confetti(Object.assign({}, config, { particleCount: pCount, origin: { x: acak(0.7, 0.9), y: Math.random() - 0.2 } }));
@@ -929,15 +947,12 @@
     }
 
     function renderSemua() {
-      const filterBulan = document.getElementById('filterBulan').value;
-      const filterTahun = document.getElementById('filterTahun').value;
-      let totalMasuk = 0, totalKeluar = 0, netBalance = 0;
-      currentFilteredData = []; let kategoriTotals = {};
+      const filterBulan = document.getElementById('filterBulan').value; const filterTahun = document.getElementById('filterTahun').value;
+      let totalMasuk = 0, totalKeluar = 0, netBalance = 0; currentFilteredData = []; let kategoriTotals = {};
       
       rawData.forEach(item => {
         const tgl = new Date(item.tanggal);
-        const matchBulan = filterBulan === 'all' || tgl.getMonth() == filterBulan;
-        const matchTahun = filterTahun === 'all' || tgl.getFullYear() == filterTahun;
+        const matchBulan = filterBulan === 'all' || tgl.getMonth() == filterBulan; const matchTahun = filterTahun === 'all' || tgl.getFullYear() == filterTahun;
         
         if (item.tipe === 'Pemasukan') netBalance += Number(item.jumlah);
         if (item.tipe === 'Pengeluaran') netBalance -= Number(item.jumlah);
@@ -946,36 +961,25 @@
           currentFilteredData.push(item);
           if (item.tipe === 'Pemasukan') totalMasuk += Number(item.jumlah);
           if (item.tipe === 'Pengeluaran') {
-            totalKeluar += Number(item.jumlah);
-            let namaKat = item.kategori || 'Lainnya';
-            kategoriTotals[namaKat] = (kategoriTotals[namaKat] || 0) + Number(item.jumlah);
+            totalKeluar += Number(item.jumlah); let namaKat = item.kategori || 'Lainnya'; kategoriTotals[namaKat] = (kategoriTotals[namaKat] || 0) + Number(item.jumlah);
           }
         }
       });
 
-      document.getElementById('netBalanceDesk').innerText = formatRupiah(netBalance);
-      document.getElementById('netBalanceMob').innerText = formatRupiah(netBalance);
-      document.getElementById('totalMasuk').innerText = formatRupiah(totalMasuk);
-      document.getElementById('totalKeluar').innerText = formatRupiah(totalKeluar);
-      document.getElementById('countRow').innerText = currentFilteredData.length + " Total Data";
+      document.getElementById('netBalanceDesk').innerText = formatRupiah(netBalance); document.getElementById('netBalanceMob').innerText = formatRupiah(netBalance);
+      document.getElementById('totalMasuk').innerText = formatRupiah(totalMasuk); document.getElementById('totalKeluar').innerText = formatRupiah(totalKeluar); document.getElementById('countRow').innerText = currentFilteredData.length + " Total Data";
+      renderChart(totalMasuk, totalKeluar, totalMasuk - totalKeluar); renderDonutChart(kategoriTotals);
 
-      renderChart(totalMasuk, totalKeluar, totalMasuk - totalKeluar);
-      renderDonutChart(kategoriTotals);
-
-      const infoHealthDesk = document.getElementById('healthIndicatorDesk');
-      const infoHealthMob = document.getElementById('healthIndicatorMob');
-      
+      const infoHealthDesk = document.getElementById('healthIndicatorDesk'); const infoHealthMob = document.getElementById('healthIndicatorMob');
       if (netBalance < 0) { 
         infoHealthDesk.innerText = "DEFISIT"; infoHealthDesk.className = "text-[9px] font-bold px-2 py-1 rounded-md bg-rose-500/20 text-rose-500"; 
         infoHealthMob.innerText = "DEFISIT"; infoHealthMob.className = "text-[9px] font-bold px-2 py-1 rounded-md bg-rose-500/20 text-rose-500"; 
       } else {
-        const rasioKeluar = totalMasuk > 0 ? (totalKeluar / totalMasuk) * 100 : 100;
-        let txt = "", clsDesk = "", clsMob = "";
+        const rasioKeluar = totalMasuk > 0 ? (totalKeluar / totalMasuk) * 100 : 100; let txt = "", clsDesk = "", clsMob = "";
         if (rasioKeluar <= 50) { txt = "STABIL"; clsDesk = "text-[9px] font-bold px-2 py-1 rounded-md bg-emerald-500/20 text-emerald-500"; clsMob = "text-[9px] font-bold px-2 py-1 rounded-md bg-emerald-500/20 text-emerald-500"; } 
         else if (rasioKeluar <= 85) { txt = "NORMAL"; clsDesk = "text-[9px] font-bold px-2 py-1 rounded-md bg-blue-500/20 text-blue-500"; clsMob = "text-[9px] font-bold px-2 py-1 rounded-md bg-blue-500/20 text-blue-500"; } 
         else { txt = "TINGGI PENGELUARAN"; clsDesk = "text-[9px] font-bold px-2 py-1 rounded-md bg-orange-500/20 text-orange-500"; clsMob = "text-[9px] font-bold px-2 py-1 rounded-md bg-orange-500/20 text-orange-500"; }
-        infoHealthDesk.innerText = txt; infoHealthDesk.className = clsDesk;
-        infoHealthMob.innerText = txt; infoHealthMob.className = clsMob;
+        infoHealthDesk.innerText = txt; infoHealthDesk.className = clsDesk; infoHealthMob.innerText = txt; infoHealthMob.className = clsMob;
       }
 
       let progress = 0;
@@ -983,64 +987,40 @@
         progress = Math.min((netBalance / targetTabunganGlobal) * 100, 100);
         if (progress >= 100 && !confettiTelahMuncul) { pemicuConfetti(); confettiTelahMuncul = true; } else if (progress < 100) { confettiTelahMuncul = false; }
       }
-      document.getElementById('targetProgressBar').style.width = (progress < 0 ? 0 : progress) + '%';
-      document.getElementById('targetProgressText').innerText = Math.round(progress < 0 ? 0 : progress) + '%';
+      document.getElementById('targetProgressBar').style.width = (progress < 0 ? 0 : progress) + '%'; document.getElementById('targetProgressText').innerText = Math.round(progress < 0 ? 0 : progress) + '%';
 
       currentFilteredData.sort((a,b) => new Date(b.tanggal) - new Date(a.tanggal));
       const totalPages = Math.ceil(currentFilteredData.length / rowsPerPage) || 1;
       if (currentPage > totalPages) currentPage = totalPages; if (currentPage < 1) currentPage = 1;
 
-      const startIndex = (currentPage - 1) * rowsPerPage;
-      const paginatedData = currentFilteredData.slice(startIndex, startIndex + rowsPerPage);
-
+      const startIndex = (currentPage - 1) * rowsPerPage; const paginatedData = currentFilteredData.slice(startIndex, startIndex + rowsPerPage);
       const tbody = document.getElementById('tabelBody'); tbody.innerHTML = '';
       if (paginatedData.length === 0) {
         tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-slate-400 text-[10px] italic">Belum ada transaksi.</td></tr>`;
       } else {
         paginatedData.forEach(item => {
           const isMasuk = item.tipe === 'Pemasukan';
-          let labelBadge = isMasuk 
-            ? (item.pembayar ? `<span class="bg-emerald-50 text-emerald-600 border border-emerald-200 text-[9px] px-1.5 py-0.5 rounded-md mr-1.5 font-bold"><i class="fa-solid fa-user mr-1"></i>${item.pembayar}</span>` : '')
-            : (item.kategori ? `<span class="bg-slate-100 text-slate-600 border border-slate-200 text-[9px] px-1.5 py-0.5 rounded-md mr-1.5 font-bold uppercase"><i class="fa-solid fa-tag mr-1"></i>${item.kategori}</span>` : '');
-          
-          tbody.innerHTML += `
-            <tr class="hover:bg-slate-50 transition-colors">
-              <td class="px-4 py-2.5 text-slate-500 whitespace-nowrap">${new Date(item.tanggal).toLocaleDateString('id-ID')}</td>
-              <td class="px-4 py-2.5 font-semibold flex items-center">${labelBadge} ${item.keterangan}</td>
-              <td class="px-4 py-2.5 text-right font-black ${isMasuk ? 'text-emerald-500':'text-rose-500'}">${isMasuk ? '+':'-'} ${Number(item.jumlah).toLocaleString('id-ID')}</td>
-              <td class="px-4 py-2.5 text-center"><button onclick="persiapanHapus(${item.row})" class="text-rose-400 hover:text-rose-600 text-xs"><i class="fa-solid fa-trash-can"></i></button></td>
-            </tr>
-          `;
+          let labelBadge = isMasuk ? (item.pembayar ? `<span class="bg-emerald-50 text-emerald-600 border border-emerald-200 text-[9px] px-1.5 py-0.5 rounded-md mr-1.5 font-bold"><i class="fa-solid fa-user mr-1"></i>${item.pembayar}</span>` : '') : (item.kategori ? `<span class="bg-slate-100 text-slate-600 border border-slate-200 text-[9px] px-1.5 py-0.5 rounded-md mr-1.5 font-bold uppercase"><i class="fa-solid fa-tag mr-1"></i>${item.kategori}</span>` : '');
+          tbody.innerHTML += `<tr class="hover:bg-slate-50 transition-colors"><td class="px-4 py-2.5 text-slate-500 whitespace-nowrap">${new Date(item.tanggal).toLocaleDateString('id-ID')}</td><td class="px-4 py-2.5 font-semibold flex items-center">${labelBadge} ${item.keterangan}</td><td class="px-4 py-2.5 text-right font-black ${isMasuk ? 'text-emerald-500':'text-rose-500'}">${isMasuk ? '+':'-'} ${Number(item.jumlah).toLocaleString('id-ID')}</td><td class="px-4 py-2.5 text-center"><button onclick="persiapanHapus(${item.row})" class="text-rose-400 hover:text-rose-600 text-xs"><i class="fa-solid fa-trash-can"></i></button></td></tr>`;
         });
       }
-      document.getElementById('pageInfo').innerText = `Hal ${currentPage} dari ${totalPages}`;
-      document.getElementById('btnPrevPage').disabled = currentPage === 1;
-      document.getElementById('btnNextPage').disabled = currentPage === totalPages;
+      document.getElementById('pageInfo').innerText = `Hal ${currentPage} dari ${totalPages}`; document.getElementById('btnPrevPage').disabled = currentPage === 1; document.getElementById('btnNextPage').disabled = currentPage === totalPages;
     }
 
     function simpanTransaksi(isModal = false) {
-      const pfx = isModal ? 'm_' : '';
-      const rawJumlah = document.getElementById(pfx+'jumlahInput').value;
-      const jumlahBaru = Number(rawJumlah.replace(/\./g, ''));
-      let ket = document.getElementById(pfx+'ketInput').value;
-      
+      const pfx = isModal ? 'm_' : ''; const rawJumlah = document.getElementById(pfx+'jumlahInput').value; const jumlahBaru = Number(rawJumlah.replace(/\./g, '')); let ket = document.getElementById(pfx+'ketInput').value;
       if(!jumlahBaru || (tipeTerpilih === 'Pengeluaran' && !ket)) return alert('Mohon isi jumlah dan keterangan!');
-      const pembayar = tipeTerpilih === 'Pemasukan' ? document.getElementById(pfx+'pembayarInput').value : '';
-      const kategori = tipeTerpilih === 'Pengeluaran' ? document.getElementById(pfx+'kategoriInput').value : '';
+      const pembayar = tipeTerpilih === 'Pemasukan' ? document.getElementById(pfx+'pembayarInput').value : ''; const kategori = tipeTerpilih === 'Pengeluaran' ? document.getElementById(pfx+'kategoriInput').value : '';
 
       if (tipeTerpilih === 'Pemasukan' && !pembayar) return alert('Mohon pilih nama pembayar dari daftar!');
-      const btn = document.getElementById(pfx+'btnSubmit');
-      btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Menyimpan...';
+      const btn = document.getElementById(pfx+'btnSubmit'); btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner animate-spin"></i> Menyimpan...';
 
       panggilAPIJsonp(API_URL, { action: 'tambahTransaksi', tipe: tipeTerpilih, jumlah: jumlahBaru, pembayar: pembayar, kategori: kategori, keterangan: ket }, function(res) {
         if(res.success) {
           document.getElementById(pfx+'jumlahInput').value = ''; document.getElementById(pfx+'ketInput').value = '';
-          if(tipeTerpilih === 'Pemasukan') {
-             document.getElementById(pfx+'kelasInput').value = ''; document.getElementById(pfx+'pembayarInput').innerHTML = '<option value="">Pilih Kelas Dahulu</option>';
-          }
+          if(tipeTerpilih === 'Pemasukan') { document.getElementById(pfx+'kelasInput').value = ''; document.getElementById(pfx+'pembayarInput').innerHTML = '<option value="">Pilih Kelas Dahulu</option>'; }
           btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i> Simpan Data';
-          if(isModal) toggleModalPencatatan(false);
-          fetchSiswaAndData();
+          if(isModal) toggleModalPencatatan(false); fetchSiswaAndData();
         } else { alert(res.message); btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i> Simpan Data'; }
       });
     }
@@ -1064,8 +1044,7 @@
 
         clearTimeout(timerHapusDelay);
         timerHapusDelay = setTimeout(() => {
-          clearInterval(timerUndoVisual);
-          sb.classList.remove('bottom-8'); sb.classList.add('bottom-[-100px]');
+          clearInterval(timerUndoVisual); sb.classList.remove('bottom-8'); sb.classList.add('bottom-[-100px]');
           if (barisAkanDihapus) {
             panggilAPIJsonp(API_URL, { action: 'hapusTransaksi', row: barisAkanDihapus.row }, res => { if(!res.success) { alert("Gagal koneksi server."); fetchSiswaAndData(); } });
             barisAkanDihapus = null;
@@ -1075,12 +1054,10 @@
     }
 
     function updateTarget(event) {
-      const rawVal = document.getElementById('targetInput').value; const val = rawVal.replace(/\./g, '');
-      if(!val) return alert('Masukkan nominal target!');
+      const rawVal = document.getElementById('targetInput').value; const val = rawVal.replace(/\./g, ''); if(!val) return alert('Masukkan nominal target!');
       const btn = event.target; const originalText = btn.innerText; btn.disabled = true; btn.innerHTML = '...';
       panggilAPIJsonp(API_URL, { action: 'simpanTarget', jumlah: val }, function(res) {
-        btn.disabled = false; btn.innerText = originalText;
-        if(res.success) fetchSiswaAndData(); else alert("Gagal mengubah target.");
+        btn.disabled = false; btn.innerText = originalText; if(res.success) fetchSiswaAndData(); else alert("Gagal mengubah target.");
       });
     }
 
@@ -1101,16 +1078,13 @@
     function gantiHalaman(step) { currentPage += step; renderSemua(); }
 
     function renderChart(masuk, keluar, sisa) {
-      const ctx = document.getElementById('financialChart').getContext('2d');
-      if (financialChartInstance) financialChartInstance.destroy();
+      const ctx = document.getElementById('financialChart').getContext('2d'); if (financialChartInstance) financialChartInstance.destroy();
       financialChartInstance = new Chart(ctx, { type: 'bar', data: { labels: ['Pemasukan', 'Pengeluaran', 'Sisa Kas'], datasets: [{ data: [masuk, keluar, sisa], backgroundColor: ['#10b98126', '#f43f5e26', '#3b82f626'], borderColor: ['#10b981', '#f43f5e', '#3b82f6'], borderWidth: 2, borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { callback: v => 'Rp ' + v.toLocaleString('id-ID') } }, x: { grid: { display: false } } } } });
     }
 
     function renderDonutChart(kategoriData) {
-      const ctx = document.getElementById('donutChart').getContext('2d');
-      if (donutChartInstance) donutChartInstance.destroy();
-      const labels = Object.keys(kategoriData); const data = Object.values(kategoriData);
-      if (labels.length === 0) { labels.push('Belum ada data'); data.push(1); }
+      const ctx = document.getElementById('donutChart').getContext('2d'); if (donutChartInstance) donutChartInstance.destroy();
+      const labels = Object.keys(kategoriData); const data = Object.values(kategoriData); if (labels.length === 0) { labels.push('Belum ada data'); data.push(1); }
       donutChartInstance = new Chart(ctx, { type: 'doughnut', data: { labels: labels, datasets: [{ data: data, backgroundColor: ['#f43f5e', '#3b82f6', '#f59e0b', '#10b981', '#8b5cf6', '#64748b'], borderWidth: 2, borderColor: '#ffffff' }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 8, font: { size: 9 } } }, tooltip: { callbacks: { label: c => c.label === 'Belum ada data' ? ' Rp 0' : ' Rp ' + c.raw.toLocaleString('id-ID') } } }, cutout: '65%' } });
     }
 
@@ -1130,12 +1104,10 @@
       if(nomorSurat === null) return;
       
       const { jsPDF } = window.jspdf; const doc = new jsPDF('p', 'mm', 'a4');
-      
-      doc.addImage(LOGO_BASE64, 'PNG', 14, 12, 28, 28); 
+      doc.addImage(LOGO_BASE64, 'PNG', 14, 11, 22, 22.5); 
       doc.setFont("helvetica", "bold"); doc.setFontSize(16); doc.text("MAN INSAN CENDEKIA LOMBOK TIMUR", 46, 20);
       doc.setFont("helvetica", "italic"); doc.setFontSize(9); doc.text("Jl. Soekarno - Hatta, Suangi, Kec. Sakra Kabupaten Lombok Timur - NTB : 83671", 46, 26);
       doc.setFont("helvetica", "normal"); doc.text("Website : ", 46, 32); doc.setTextColor(0, 0, 255); doc.text("https://aksarasenja-official.github.io/BahruUlum/", 62, 32); doc.setTextColor(0, 0, 0); 
-
       doc.setLineWidth(0.8); doc.line(14, 35, 196, 35); doc.setLineWidth(0.2); doc.line(14, 36.5, 196, 36.5);
 
       let today = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
@@ -1144,27 +1116,16 @@
       doc.setFont("helvetica", "bold"); doc.text("Perihal : Laporan Kas Asrama", 14, 68);
 
       let tableData = currentFilteredData.map(item => {
-        let ket = item.keterangan || "-";
-        if(item.tipe === 'Pengeluaran' && item.kategori) ket += ` [${item.kategori}]`;
+        let ket = item.keterangan || "-"; if(item.tipe === 'Pengeluaran' && item.kategori) ket += ` [${item.kategori}]`;
         let nom = (item.tipe === 'Pemasukan' ? "" : "- ") + Number(item.jumlah).toLocaleString('id-ID');
         let namaKolom = (item.tipe === 'Pemasukan') ? (item.pembayar || "-") : "-";
-        
         return [ new Date(item.tanggal).toLocaleDateString('id-ID'), item.tipe, namaKolom, ket, nom ];
       });
 
-      doc.autoTable({ 
-          startY: 78, 
-          head: [['Tanggal', 'Jenis', 'Nama', 'Keterangan', 'Nominal']], 
-          body: tableData, 
-          theme: 'grid', 
-          headStyles: { fillColor: [154, 198, 154], textColor: [0, 0, 0], fontStyle: 'bold', lineColor: [0,0,0], lineWidth: 0.2 }, 
-          bodyStyles: { lineColor: [0,0,0], lineWidth: 0.2, textColor: [0,0,0] }, 
-          columnStyles: { 0: { cellWidth: 25 }, 1: { cellWidth: 25 }, 2: { cellWidth: 40 }, 3: { cellWidth: 50 }, 4: { cellWidth: 35, halign: 'right' } } 
-      });
+      doc.autoTable({ startY: 78, head: [['Tanggal', 'Jenis', 'Nama', 'Keterangan', 'Nominal']], body: tableData, theme: 'grid', headStyles: { fillColor: [154, 198, 154], textColor: [0, 0, 0], fontStyle: 'bold', lineColor: [0,0,0], lineWidth: 0.2 }, bodyStyles: { lineColor: [0,0,0], lineWidth: 0.2, textColor: [0,0,0] }, columnStyles: { 0: { cellWidth: 25 }, 1: { cellWidth: 25 }, 2: { cellWidth: 40 }, 3: { cellWidth: 50 }, 4: { cellWidth: 35, halign: 'right' } } });
 
       let finalY = doc.lastAutoTable.finalY || 80;
       let totMasuk = formatRupiah(document.getElementById('totalMasuk').innerText.replace(/[^0-9]/g, '')); let totKeluar = formatRupiah(document.getElementById('totalKeluar').innerText.replace(/[^0-9]/g, '')); let sisa = formatRupiah(document.getElementById('netBalanceDesk').innerText.replace(/[^0-9]/g, ''));
-      
       finalY += 8; if (finalY > 230) { doc.addPage(); finalY = 20; }
       
       doc.setFont("helvetica", "normal"); doc.text("Total Pemasukan", 110, finalY); doc.text(`:   ${totMasuk}`, 145, finalY);
