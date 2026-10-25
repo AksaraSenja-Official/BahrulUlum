@@ -2380,12 +2380,14 @@ function resetFormUser() {
       for(let d=1; d<=daysInMonth; d++) {
         let dayData = data[d-1]; 
         let isJumat = dayData.isJumat ? 'is-jumat' : '';
-        let subuhW = (activeJadwalTab === 'imam' && dayData.isJumat) ? 'font-black' : 'font-semibold';
+        let isImamJumatSubuh = (activeJadwalTab === 'imam' && dayData.isJumat);
+        let subuhW = isImamJumatSubuh ? 'font-black' : 'font-semibold';
+        let styleSubuhKuning = isImamJumatSubuh ? 'background-color: #fef08a !important; color: #854d0e !important;' : '';
 
         grid.innerHTML += `
           <div class="calendar-cell ${isJumat}">
             <div class="date-num">${d}</div>
-            <div class="jadwal-item jadwal-item-subuh ${subuhW}">${dayData.subuh}</div>
+            <div class="jadwal-item jadwal-item-subuh ${subuhW}" style="${styleSubuhKuning}">${dayData.subuh}</div>
             <div class="jadwal-item jadwal-item-ashar font-semibold">${dayData.ashar}</div>
             <div class="jadwal-item jadwal-item-maghrib font-semibold">${dayData.maghrib}</div>
             <div class="jadwal-item jadwal-item-isya font-semibold">${dayData.isya}</div>
@@ -3427,6 +3429,10 @@ function renderPembinaDropdown() {
       }
       
       if (!filteredData.length) return showCustomToast('error', 'Tidak ada data dalam rentang tanggal tersebut.');
+
+      // --- KODE YANG DITAMBAHKAN: Mengurutkan data berdasarkan nama siswa (Abjad A-Z) ---
+      filteredData.sort((a, b) => a.nama.localeCompare(b.nama));
+      // ----------------------------------------------------------------------------------
 
       catatAudit("Export", "Cetak Rekapan Kedisiplinan (PDF)");
       const { jsPDF } = window.jspdf; const doc = new jsPDF('p', 'mm', 'a4');
