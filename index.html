@@ -2405,11 +2405,37 @@ function resetFormUser() {
     function exportJadwalPDF() {
       if (!currentJadwalData.adzan.length) return showCustomToast('error', 'Sila buat jadwal terlebih dahulu!');
       const { jsPDF } = window.jspdf; const doc = new jsPDF('p', 'mm', 'a4');
-      const isAdzan = activeJadwalTab === 'adzan'; const title = isAdzan ? "JADWAL AZAN" : "JADWAL IMAM"; const subtitle = `BULAN ${currentJadwalData.bulan.toUpperCase()} ${currentJadwalData.tahun}`;
+      const isAdzan = activeJadwalTab === 'adzan'; 
+      const title = isAdzan ? "JADWAL AZAN" : "JADWAL IMAM"; 
+      const subtitle = `BULAN ${currentJadwalData.bulan.toUpperCase()} ${currentJadwalData.tahun}`;
+      
       doc.setFont("helvetica", "bold"); doc.setFontSize(14); doc.text(title, 105, 20, { align: "center" }); doc.text(subtitle, 105, 26, { align: "center" });
+      
       const tableData = (isAdzan ? currentJadwalData.adzan : currentJadwalData.imam).map(row => [ row.tanggalStr, row.subuh, row.ashar, row.maghrib, row.isya ]);
       const headColor = isAdzan ? [155, 194, 230] : [169, 208, 142]; 
-      doc.autoTable({ startY: 35, head: [['Hari / Tanggal', 'Subuh', 'Ashar', 'Maghrib', "Isya'"]], body: tableData, theme: 'grid', headStyles: { fillColor: headColor, textColor: [0,0,0], fontStyle: 'bold', lineColor: [0,0,0], lineWidth: 0.2, halign: 'center' }, bodyStyles: { lineColor: [0,0,0], lineWidth: 0.2, textColor: [0,0,0], halign: 'center' }, columnStyles: { 0: { halign: 'left' } } });
+      
+      doc.autoTable({ 
+        startY: 35, 
+        head: [['Hari / Tanggal', 'Subuh', 'Ashar', 'Maghrib', "Isya'"]], 
+        body: tableData, 
+        theme: 'grid', 
+        headStyles: { fillColor: headColor, textColor: [0,0,0], fontStyle: 'bold', lineColor: [0,0,0], lineWidth: 0.2, halign: 'center' }, 
+        bodyStyles: { lineColor: [0,0,0], lineWidth: 0.2, textColor: [0,0,0], halign: 'center' }, 
+        columnStyles: { 0: { halign: 'left' } },
+        // --- KODE YANG DITAMBAHKAN ---
+        didParseCell: function(data) {
+          // Jika jadwal yang dicetak adalah Imam, berada di area body tabel, dan di kolom Subuh (index 1)
+          if (!isAdzan && data.section === 'body' && data.column.index === 1) {
+            // Cek apakah tanggal/hari (kolom index 0) mengandung teks 'Jumat'
+            if (data.row.raw[0].toLowerCase().includes('jumat')) {
+              data.cell.styles.fillColor = [253, 224, 71]; // Warna latar kuning
+              data.cell.styles.fontStyle = 'bold'; // Teks ditebalkan
+            }
+          }
+        }
+        // -----------------------------
+      });
+      
       catatAudit("Cetak PDF", title);
       doc.save(`${title}_${currentJadwalData.bulan}_${currentJadwalData.tahun}.pdf`);
     }
