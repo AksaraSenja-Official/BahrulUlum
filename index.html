@@ -18,9 +18,9 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <style>
-    body { font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; touch-action: pan-y; }
+    body { font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; overflow-x: hidden; touch-action: pan-y; background-color: #f8fafc; }
     .glass-effect { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
-    .custom-shadow { box-shadow: 0 10px 40px -10px rgba(0,0,0,0.06); }
+    .custom-shadow { box-shadow: 0 8px 30px -6px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.02); } .executive-card { background: linear-gradient(135deg, #09131f 0%, #0f172a 50%, #064e3b 100%); position: relative; overflow: hidden; border-radius: 1.75rem; box-shadow: 0 20px 45px -15px rgba(6, 78, 59, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.08) inset; } .executive-card::before { content: ''; position: absolute; top: -40%; right: -20%; width: 280px; height: 280px; background: radial-gradient(circle, rgba(52, 211, 153, 0.22) 0%, transparent 70%); border-radius: 50%; pointer-events: none; }
     .fade-in { animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
@@ -30,11 +30,11 @@
     .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     .kanban-col { min-height: 200px; }
     .kanban-card { transition: all 0.2s ease; }
-    .kanban-card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
+    .kanban-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px -6px rgba(15, 23, 42, 0.1); border-color: #cbd5e1; }
 
     /* CSS Grid Calendar */
-    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background-color: #f1f5f9; border: 1px solid #f1f5f9; border-radius: 0.5rem; overflow: hidden; }
-    .calendar-day-header { background-color: #e2e8f0; text-align: center; padding: 8px 4px; font-size: 10px; font-weight: 800; color: #475569; text-transform: uppercase; }
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; background-color: #e2e8f0; border: 1px solid #e2e8f0; border-radius: 1rem; overflow: hidden; }
+    .calendar-day-header { background-color: #f8fafc; text-align: center; padding: 10px 4px; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e2e8f0; }
     .calendar-cell { background-color: white; min-height: 80px; padding: 6px; display: flex; flex-direction: column; transition: background-color 0.2s; }
     .calendar-cell:hover { background-color: #f8fafc; }
     .calendar-cell.empty { background-color: #f8fafc; }
@@ -70,7 +70,7 @@
       </div>
 
       <h1 class="text-3xl font-black text-slate-900 tracking-tight">Bahrul <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-400">Ulum</span></h1>
-      <p class="text-[11px] text-slate-500 font-bold uppercase tracking-widest mt-2 mb-8">Sistem Manajemen Data Asrama</p>
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold tracking-wide uppercase border border-emerald-200/60 mb-2"><i class="fa-solid fa-mosque text-emerald-600"></i> MAN Insan Cendekia Lotim</div><p class="text-[11px] text-slate-500 font-bold uppercase tracking-widest mt-1 mb-6">Sistem Manajemen Asrama</p>
 
       <div class="space-y-5 text-left">
         <div class="relative">
@@ -79,7 +79,7 @@
             <i class="fa-solid fa-eye text-lg"></i>
           </button>
         </div>
-        <button onclick="prosesLoginPIN()" id="btnLogin" disabled class="w-full bg-slate-400 text-white font-bold py-4 rounded-2xl text-sm transition-all duration-300 shadow flex items-center justify-center gap-2">
+        <button onclick="prosesLoginPIN()" id="btnLogin" disabled class="w-full bg-slate-400 text-white font-bold py-3.5 rounded-2xl text-sm transition-all duration-300 shadow-md flex items-center justify-center gap-2">
           <i class="fa-solid fa-spinner animate-spin"></i> Memuat...
         </button>
       </div>
@@ -88,7 +88,7 @@
 
   <!-- ================= SIDEBAR MOBILE (LACI NAVIGASI) ================= -->
   <div id="mobileSidebar" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm hidden transition-opacity lg:hidden">
-    <div class="absolute left-0 top-0 bottom-0 w-72 bg-white shadow-2xl p-6 flex flex-col justify-between transform -translate-x-full transition-transform duration-300" id="sidebarContent">
+    <div class="absolute left-0 top-0 bottom-0 w-72 bg-white/95 backdrop-blur-md shadow-2xl p-6 flex flex-col justify-between transform -translate-x-full transition-transform duration-300 border-r border-slate-200/80" id="sidebarContent">
       <div>
         <div class="flex items-center justify-between mb-8 pb-4 border-b border-slate-100">
           <div class="flex items-center gap-3">
@@ -132,7 +132,7 @@
     <!-- DESKTOP SIDEBAR + MAIN LAYOUT WRAPPER -->
     <div class="flex min-h-screen">
       <!-- SIDEBAR KHUSUS LAPTOP/DESKTOP -->
-      <aside id="desktopSidebar" class="hidden lg:flex flex-col w-64 bg-white border-r border-slate-200 p-6 fixed inset-y-0 z-40 justify-between transition-transform duration-300 -translate-x-full">
+      <aside id="desktopSidebar" class="hidden lg:flex flex-col w-64 bg-white/95 backdrop-blur-md border-r border-slate-200/80 p-6 fixed inset-y-0 z-40 justify-between transition-transform duration-300 -translate-x-full shadow-lg shadow-slate-900/5">
         <div>
           <div class="flex items-center gap-3 mb-8 pb-4 border-b border-slate-100">
             <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 font-bold shadow-sm">
@@ -193,8 +193,8 @@
 
             <div class="flex items-center gap-2 sm:gap-3">
               <!-- Tombol Pencarian Global (Hanya Ikon di Laptop) -->
-              <button onclick="bukaModalGlobalSearch()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold p-2.5 sm:px-3.5 rounded-xl transition flex items-center justify-center gap-2 border border-slate-200 shadow-sm" title="Pencarian Global (Ctrl + K)">
-                <i class="fa-solid fa-magnifying-glass text-emerald-600 text-sm"></i> <span class="hidden md:inline text-xs">Cari</span>
+              <button onclick="bukaModalGlobalSearch()" class="bg-slate-50 hover:bg-white text-slate-600 text-xs font-semibold py-2 px-3 sm:px-4 rounded-xl transition-all flex items-center justify-center gap-2 border border-slate-200 shadow-xs hover:border-emerald-200" title="Pencarian Global (Ctrl + K)">
+                <i class="fa-solid fa-magnifying-glass text-emerald-600 text-xs"></i> <span class="hidden md:inline text-xs text-slate-500">Cari santri...</span> <kbd class="hidden md:inline-block bg-white text-[10px] text-slate-400 font-mono px-1.5 py-0.5 rounded border border-slate-200">Ctrl K</kbd>
               </button>
 
               <!-- Tombol Keluar khusus mobile di header -->
@@ -211,10 +211,10 @@
           <div id="viewBeranda" class="grid grid-cols-1 lg:grid-cols-12 gap-6 fade-in">
             <div class="lg:col-span-4 space-y-6 hidden lg:block">
               <!-- Widget Saldo (Desktop) -->
-              <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-teal-900 text-white rounded-[2rem] p-7 shadow-2xl shadow-slate-900/20 relative overflow-hidden group hover:scale-[1.02] transition-transform duration-300 cursor-default">
+              <div class="executive-card text-white p-7 cursor-default group transition-all duration-300 hover:shadow-2xl hover:shadow-emerald-900/20">
                 <div class="absolute -right-6 -bottom-6 text-white text-8xl opacity-[0.03] pointer-events-none transform rotate-12 group-hover:rotate-6 group-hover:scale-110 transition-all duration-500"><i class="fa-solid fa-wallet"></i></div>
                 <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/20 rounded-full blur-3xl"></div>
-                <p class="text-[10px] text-emerald-200/80 uppercase font-bold tracking-widest mb-1 relative z-10">Total Saldo Kas Asrama</p>
+                <div class="flex items-center justify-between mb-2 relative z-10"><span class="text-[10px] text-emerald-300 font-bold uppercase tracking-widest bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20"><i class="fa-solid fa-vault mr-1"></i> Kas Utama Asrama</span><span class="text-xs text-slate-400 font-medium">Bahrul Ulum</span></div>
                 <h2 class="text-4xl font-black text-white tracking-tight relative z-10 drop-shadow-md" id="netBalanceDesk">Rp 0</h2>
                 <div class="mt-6 pt-5 border-t border-white/10 flex items-center justify-between relative z-10">
                   <span class="text-[11px] text-slate-300 font-medium flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]"></div> Status Keuangan</span>
@@ -223,7 +223,7 @@
               </div>
 
               <!-- Form Catat Transaksi -->
-              <div id="panelPencatatan" class="bg-white rounded-[2rem] p-6 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 hover:border-emerald-100 transition-colors duration-300">
+              <div id="panelPencatatan" class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs hover:border-emerald-200 hover:shadow-md transition-all duration-300">
                 <h3 class="font-black text-slate-800 mb-5 flex items-center gap-2.5 text-sm"><div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-50 flex items-center justify-center"><i class="fa-solid fa-plus text-emerald-500"></i></div> Catat Transaksi</h3>
                 <div class="space-y-4">
                   <div class="bg-slate-50 p-1 rounded-xl flex gap-1">
@@ -291,9 +291,9 @@
             </div>
 
             <div class="lg:col-span-8 space-y-6">
-              <div class="lg:hidden bg-gradient-to-br from-slate-900 via-slate-800 to-teal-900 text-white rounded-[2rem] p-6 shadow-2xl relative overflow-hidden">
+              <div class="lg:hidden executive-card text-white p-6 shadow-xl mb-2">
                  <div class="absolute -right-6 -bottom-6 text-white text-8xl opacity-[0.03] pointer-events-none transform rotate-12"><i class="fa-solid fa-wallet"></i></div>
-                 <p class="text-[10px] text-emerald-200/80 uppercase font-bold tracking-widest mb-1 relative z-10">Total Saldo Kas</p>
+                 <div class="flex items-center justify-between mb-1.5 relative z-10"><span class="text-[10px] text-emerald-300 font-bold uppercase tracking-widest bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20"><i class="fa-solid fa-vault mr-1"></i> Kas Utama</span><span class="text-[10px] text-slate-400">Bahrul Ulum</span></div>
                  <h2 class="text-3xl font-black text-white tracking-tight relative z-10" id="netBalanceMob">Rp 0</h2>
                  <div class="mt-5 pt-4 border-t border-white/10 flex items-center justify-between relative z-10">
                     <span class="text-[10px] text-slate-300 font-medium">Status Keuangan</span>
@@ -303,21 +303,21 @@
 
               <!-- Statistik Singkat -->
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div class="bg-white rounded-[1.5rem] p-5 flex flex-col justify-center custom-shadow border border-slate-100 transition-all">
+                <div class="bg-white rounded-2xl p-5 flex flex-col justify-center border border-slate-200/80 shadow-xs hover:shadow-md hover:border-slate-300 transition-all duration-300">
                   <div class="flex items-center gap-3 mb-2">
                     <div class="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-500 text-sm"><i class="fa-solid fa-arrow-trend-up"></i></div>
                     <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wide">Pemasukan</p>
                   </div>
                   <p class="text-xl font-black text-slate-800 ml-1" id="totalMasuk">Rp 0</p>
                 </div>
-                <div class="bg-white rounded-[1.5rem] p-5 flex flex-col justify-center custom-shadow border border-slate-100 transition-all">
+                <div class="bg-white rounded-2xl p-5 flex flex-col justify-center border border-slate-200/80 shadow-xs hover:shadow-md hover:border-slate-300 transition-all duration-300">
                   <div class="flex items-center gap-3 mb-2">
                     <div class="w-8 h-8 rounded-full bg-rose-50 flex items-center justify-center text-rose-500 text-sm"><i class="fa-solid fa-arrow-trend-down"></i></div>
                     <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wide">Pengeluaran</p>
                   </div>
                   <p class="text-xl font-black text-slate-800 ml-1" id="totalKeluar">Rp 0</p>
                 </div>
-                <div class="bg-white rounded-[1.5rem] p-4 flex flex-col justify-center custom-shadow border border-slate-100 transition-all">
+                <div class="bg-white rounded-2xl p-4.5 flex flex-col justify-center border border-slate-200/80 shadow-xs hover:shadow-md hover:border-indigo-200 transition-all duration-300">
                   <div class="flex justify-between items-center mb-2">
                     <div class="flex items-center gap-2">
                       <span class="text-[10px] text-slate-400 font-bold uppercase flex items-center gap-1.5"><i class="fa-solid fa-bullseye text-indigo-500"></i> Target</span>
@@ -336,7 +336,7 @@
               </div>
 
               <!-- Visualisasi Data -->
-              <div class="bg-white rounded-[2rem] p-6 custom-shadow border border-slate-100">
+              <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs">
                 <div class="flex justify-between items-center mb-6">
                   <h3 class="font-black text-slate-800 text-sm flex items-center gap-2"><div class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-500 flex items-center justify-center"><i class="fa-solid fa-chart-pie"></i></div> Visualisasi Data</h3>
                   <div class="flex flex-wrap gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200 items-center">
@@ -358,7 +358,7 @@
               </div>
 
               <!-- Riwayat Kas -->
-              <div class="bg-white rounded-[2rem] custom-shadow border border-slate-100 overflow-hidden flex flex-col">
+              <div class="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden flex flex-col">
                 <div class="px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between sm:items-center gap-3">
                   <div class="flex items-center gap-2">
                     <h3 class="font-black text-slate-800 text-sm flex items-center gap-2"><div class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center"><i class="fa-solid fa-list-ul"></i></div> Riwayat Kas</h3>
@@ -368,9 +368,9 @@
                     <select id="pageSize" onchange="ubahFilter()" class="bg-slate-50 text-slate-600 text-[10px] font-bold px-2 py-1.5 rounded-lg border border-slate-200 outline-none">
                       <option value="10">10 / hal</option><option value="15" selected>15 / hal</option><option value="25">25 / hal</option><option value="50">50 / hal</option><option value="100">100 / hal</option>
                     </select>
-                    <button onclick="exportExcel()" class="bg-green-50 text-green-600 hover:bg-green-100 text-[10px] font-bold px-3 py-1.5 rounded-lg transition-colors border border-green-200 flex items-center gap-1.5"><i class="fa-solid fa-file-excel"></i> Excel</button>
-                    <button onclick="exportPDF()" class="bg-rose-50 text-rose-600 hover:bg-rose-100 text-[10px] font-bold px-3 py-1.5 rounded-lg transition-colors border border-rose-200 flex items-center gap-1.5"><i class="fa-solid fa-file-pdf"></i> PDF</button>
-                    <button onclick="exportBKU()" class="bg-indigo-50 text-indigo-600 hover:bg-indigo-100 text-[10px] font-bold px-3 py-1.5 rounded-lg transition-colors border border-indigo-200 flex items-center gap-1.5"><i class="fa-solid fa-book-journal-whills"></i> BKU</button>
+                    <button onclick="exportExcel()" class="bg-emerald-50 text-emerald-700 hover:bg-emerald-100/80 text-[10px] font-bold px-3 py-1.5 rounded-xl transition-all shadow-xs border border-emerald-200/80 flex items-center gap-1.5"><i class="fa-solid fa-file-excel text-emerald-600"></i> Excel</button>
+                    <button onclick="exportPDF()" class="bg-rose-50 text-rose-700 hover:bg-rose-100/80 text-[10px] font-bold px-3 py-1.5 rounded-xl transition-all shadow-xs border border-rose-200/80 flex items-center gap-1.5"><i class="fa-solid fa-file-pdf text-rose-600"></i> PDF</button>
+                    <button onclick="exportBKU()" class="bg-indigo-50 text-indigo-700 hover:bg-indigo-100/80 text-[10px] font-bold px-3 py-1.5 rounded-xl transition-all shadow-xs border border-indigo-200/80 flex items-center gap-1.5"><i class="fa-solid fa-book-journal-whills text-indigo-600"></i> BKU</button>
                   </div>
                 </div>
 
@@ -412,15 +412,15 @@
 
             <!-- 1. TAMPILAN AWAL: TABEL RIWAYAT PELANGGARAN -->
             <div id="disiplinHistoryView" class="block">
-              <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden flex flex-col h-full relative">
+              <div class="bg-white rounded-3xl shadow-xs border border-slate-200/80 overflow-hidden flex flex-col h-full relative">
                 <!-- Header Riwayat -->
                 <div class="px-6 py-5 border-b border-slate-100 flex flex-col sm:flex-row justify-between sm:items-center gap-3 gap-y-4 bg-white">
                   <h3 class="font-black text-rose-800 text-lg flex items-center gap-2">
                     <i class="fa-solid fa-clock-rotate-left text-rose-600"></i> Log Pelanggaran
                   </h3>
                   <div class="flex flex-wrap items-center gap-2">
-                    <button onclick="exportDisiplinExcel()" class="text-emerald-600 hover:text-emerald-700 text-xs font-bold bg-white border border-emerald-200 hover:bg-emerald-50 px-3 py-2 rounded-lg shadow-sm transition-colors flex items-center gap-1.5" title="Ekspor Excel"><i class="fa-solid fa-file-excel"></i> Excel</button>
-                    <button onclick="exportDisiplinPDF()" class="text-rose-600 hover:text-rose-700 text-xs font-bold bg-white border border-rose-200 hover:bg-rose-50 px-3 py-2 rounded-lg shadow-sm transition-colors flex items-center gap-1.5" title="Cetak Rekapan PDF"><i class="fa-solid fa-file-pdf"></i> Cetak PDF</button>
+                    <button onclick="exportDisiplinExcel()" class="text-emerald-700 hover:text-emerald-800 text-xs font-bold bg-emerald-50 border border-emerald-200/80 hover:bg-emerald-100/80 px-3.5 py-2 rounded-xl shadow-xs transition-all flex items-center gap-1.5" title="Ekspor Excel"><i class="fa-solid fa-file-excel text-emerald-600"></i> Excel</button>
+                    <button onclick="exportDisiplinPDF()" class="text-rose-700 hover:text-rose-800 text-xs font-bold bg-rose-50 border border-rose-200/80 hover:bg-rose-100/80 px-3.5 py-2 rounded-xl shadow-xs transition-all flex items-center gap-1.5" title="Cetak Rekapan PDF"><i class="fa-solid fa-file-pdf text-rose-600"></i> Cetak PDF</button>
                   </div>
                 </div>
 
@@ -482,12 +482,12 @@
 
             <!-- TAMPILAN REKAP POIN SANTRI -->
             <div id="disiplinRekapView" class="hidden">
-              <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden flex flex-col h-full relative">
+              <div class="bg-white rounded-3xl shadow-xs border border-slate-200/80 overflow-hidden flex flex-col h-full relative">
                  <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-white">
                     <h3 class="font-black text-rose-800 text-lg flex items-center gap-2">
                       <i class="fa-solid fa-chart-pie text-rose-600"></i> Akumulasi Poin Pelanggaran
                     </h3>
-                    <button onclick="exportRekapDisiplinPDF()" class="text-rose-600 hover:text-rose-700 text-xs font-bold bg-white border border-rose-200 hover:bg-rose-50 px-4 py-2 rounded-full shadow-sm transition-colors flex items-center gap-1.5">
+                    <button onclick="exportRekapDisiplinPDF()" class="text-rose-700 hover:text-rose-800 text-xs font-bold bg-rose-50 border border-rose-200/80 hover:bg-rose-100/80 px-4 py-2 rounded-xl shadow-xs transition-all flex items-center gap-1.5">
                       <i class="fa-solid fa-file-pdf"></i> Cetak Laporan
                     </button>
                  </div>
@@ -556,7 +556,7 @@
             <!-- 2. TAMPILAN KEDUA: FORM INPUT DATA PELANGGARAN -->
             <div id="disiplinInputView" class="hidden fade-in max-w-6xl mx-auto">
               <!-- Header Form -->
-              <div class="bg-rose-600 text-white p-4 rounded-t-[1.5rem] flex justify-between items-center shadow-md">
+              <div class="bg-gradient-to-r from-rose-600 to-rose-700 text-white p-5 rounded-t-3xl flex justify-between items-center shadow-md">
                 <div>
                   <h3 class="font-black text-lg flex items-center gap-2"><i class="fa-solid fa-clipboard-list"></i> Rekap Kedisiplinan Mingguan Santri</h3>
                   <p class="text-[10px] text-rose-100 font-medium mt-1">Hanya baris yang diisi pelanggaran & tanggalnya yang akan tersimpan ke database.</p>
@@ -567,7 +567,7 @@
               </div>
 
               <!-- Body Form -->
-              <div class="bg-white rounded-b-[1.5rem] p-4 sm:p-6 shadow-sm border border-slate-100 flex flex-col min-h-[75vh]">
+              <div class="bg-white rounded-b-3xl p-5 sm:p-7 shadow-xs border border-slate-200/80 flex flex-col min-h-[75vh]">
                 
                 <!-- Controls: Pembina & Refresh -->
                 <div class="flex flex-col md:flex-row gap-4 mb-4 items-end">
@@ -616,7 +616,7 @@
           <div id="viewHutang" class="hidden fade-in">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div class="lg:col-span-1 space-y-6">
-                <div id="panelInputHutang" class="bg-white rounded-[2rem] p-6 custom-shadow border border-slate-100">
+                <div id="panelInputHutang" class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs">
                   <h3 class="font-black text-slate-800 mb-5 flex items-center gap-2.5 text-sm"><div class="w-8 h-8 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center"><i class="fa-solid fa-handshake"></i></div> Catat Pinjaman</h3>
                   <div class="space-y-4">
                     <div>
@@ -651,7 +651,7 @@
               </div>
 
               <div class="lg:col-span-2">
-                <div class="bg-white rounded-[2rem] custom-shadow border border-slate-100 overflow-hidden">
+                <div class="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden">
                   <div class="px-6 py-4 border-b flex justify-between bg-slate-50/80 items-center">
                     <h3 class="font-black text-slate-800 text-sm flex items-center gap-2"><div class="w-7 h-7 rounded-lg bg-slate-200 text-slate-600 flex items-center justify-center"><i class="fa-solid fa-book-open"></i></div> Rekap Hutang Piutang</h3>
                     <button onclick="fetchHutangData()" class="text-slate-600 hover:text-emerald-600 text-[11px] font-bold bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm transition-colors flex items-center gap-1.5"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
@@ -669,7 +669,7 @@
 
           <!-- ================= VIEW JADWAL ASRAMA ================= -->
           <div id="viewJadwal" class="hidden fade-in">
-            <div class="bg-white rounded-[2rem] p-6 lg:p-8 custom-shadow border border-slate-100 relative overflow-hidden">
+            <div class="bg-white rounded-3xl p-6 lg:p-8 border border-slate-200/80 shadow-xs relative overflow-hidden">
               <div class="absolute -right-10 top-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none"></div>
               <div class="flex flex-col md:flex-row justify-between md:items-center gap-5 mb-8 relative z-10">
                 <div>
@@ -677,10 +677,10 @@
                   <p class="text-xs text-slate-500 mt-2 font-medium">Buat jadwal Adzan dan Imam bulanan secara otomatis dan adil.</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-3">
-                  <button onclick="bukaModalPetugas()" class="bg-white hover:bg-slate-50 text-slate-700 font-bold py-2.5 px-4 rounded-xl text-xs transition-colors shadow-sm border border-slate-200 flex items-center gap-2">
+                  <div id="badgeReadOnlyJadwal" class="hidden items-center gap-2 px-3.5 py-2.5 bg-slate-100 text-slate-500 rounded-xl text-xs font-bold border border-slate-200"><i class="fa-solid fa-lock text-slate-400"></i> Mode Lihat Jadwal</div> <button id="btnKelolaPetugasJadwal" onclick="bukaModalPetugas()" class="bg-white hover:bg-slate-50 text-slate-700 font-bold py-2.5 px-4 rounded-xl text-xs transition-colors shadow-sm border border-slate-200 flex items-center gap-2">
                     <i class="fa-solid fa-users-gear text-slate-400"></i> Kelola Nama
                   </button>
-                  <div class="flex items-center gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
+                  <div id="wrapperGenerateJadwal" class="flex items-center gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
                     <select id="jBulan" class="bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold focus:ring-2 focus:ring-emerald-500 outline-none cursor-pointer text-slate-700">
                       <option value="0">Januari</option><option value="1">Februari</option><option value="2">Maret</option>
                       <option value="3">April</option><option value="4">Mei</option><option value="5">Juni</option>
@@ -725,7 +725,7 @@
 
           <!-- ================= VIEW PROKER (KANBAN) ================= -->
           <div id="viewProker" class="hidden fade-in">
-            <div class="flex flex-col sm:flex-row justify-between items-center mb-6 bg-white p-5 rounded-[2rem] custom-shadow border border-slate-100">
+            <div class="flex flex-col sm:flex-row justify-between items-center mb-6 bg-white p-6 rounded-3xl custom-shadow border border-slate-200/80">
                 <div>
                   <h3 class="font-black text-slate-800 text-xl flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-500 flex items-center justify-center shadow-inner"><i class="fa-solid fa-list-check"></i></div> Program Kerja Asrama</h3>
                   <p class="text-xs text-slate-500 mt-1 font-medium">Pantau status kegiatan lengkap dengan tenggat waktu, checklist, & penanggung jawab.</p>
@@ -735,14 +735,14 @@
                      <button id="btnGridView" onclick="toggleProkerView('grid')" class="px-3 py-1.5 text-xs font-bold rounded-lg bg-white text-purple-600 shadow-sm transition-all"><i class="fa-solid fa-border-all"></i></button>
                      <button id="btnListView" onclick="toggleProkerView('list')" class="px-3 py-1.5 text-xs font-bold rounded-lg text-slate-500 hover:text-slate-700 transition-all"><i class="fa-solid fa-list"></i></button>
                   </div>
-                  <button onclick="bukaModalProker()" class="bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-2">
+                  <button onclick="bukaModalProker()" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-md shadow-purple-600/20 active:scale-95 flex items-center gap-2">
                     <i class="fa-solid fa-plus"></i> Tambah Proker
                   </button>
                 </div>
             </div>
 
             <div id="prokerContainer" class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-                <div id="colTodoWrapper" class="bg-slate-100/50 border border-slate-200 rounded-2xl p-4 flex flex-col transition-all">
+                <div id="colTodoWrapper" class="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-4 flex flex-col transition-all shadow-sm">
                     <div class="kanban-col-header flex justify-between items-center mb-4">
                       <h4 class="font-bold text-slate-600 text-sm flex items-center gap-2"><i class="fa-regular fa-circle text-slate-400"></i> Akan Dikerjakan</h4>
                       <span class="bg-slate-200 text-slate-600 text-[10px] px-2 py-0.5 rounded font-black" id="countTodo">0</span>
@@ -750,7 +750,7 @@
                     <div id="colTodo" class="flex flex-col gap-3 kanban-col custom-scrollbar overflow-y-auto max-h-[60vh]"></div>
                 </div>
 
-                <div id="colProgressWrapper" class="bg-blue-50/50 border border-blue-100 rounded-2xl p-4 flex flex-col transition-all">
+                <div id="colProgressWrapper" class="bg-blue-50/40 border border-blue-200/60 rounded-2xl p-4 flex flex-col transition-all shadow-sm">
                     <div class="kanban-col-header flex justify-between items-center mb-4">
                       <h4 class="font-bold text-blue-600 text-sm flex items-center gap-2"><i class="fa-solid fa-spinner text-blue-400"></i> Sedang Berjalan</h4>
                       <span class="bg-blue-200 text-blue-700 text-[10px] px-2 py-0.5 rounded font-black" id="countProgress">0</span>
@@ -758,7 +758,7 @@
                     <div id="colProgress" class="flex flex-col gap-3 kanban-col custom-scrollbar overflow-y-auto max-h-[60vh]"></div>
                 </div>
 
-                <div id="colDoneWrapper" class="bg-emerald-50/50 border border-emerald-100 rounded-2xl p-4 flex flex-col transition-all">
+                <div id="colDoneWrapper" class="bg-emerald-50/40 border border-emerald-200/60 rounded-2xl p-4 flex flex-col transition-all shadow-sm">
                     <div class="kanban-col-header flex justify-between items-center mb-4">
                       <h4 class="font-bold text-emerald-600 text-sm flex items-center gap-2"><i class="fa-solid fa-check-circle text-emerald-400"></i> Selesai</h4>
                       <span class="bg-emerald-200 text-emerald-700 text-[10px] px-2 py-0.5 rounded font-black" id="countDone">0</span>
@@ -770,12 +770,12 @@
 
           <!-- ================= VIEW MANAJEMEN PENGGUNA ================= -->
           <div id="viewUsers" class="hidden fade-in">
-            <div class="bg-white rounded-[2rem] p-6 custom-shadow border border-slate-100">
+            <div class="bg-white rounded-3xl p-6 md:p-8 custom-shadow border border-slate-200/80">
                 <h3 class="font-black text-slate-800 mb-2 flex items-center gap-3 text-lg"><div class="w-10 h-10 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center"><i class="fa-solid fa-users-cog"></i></div> Manajemen Pengguna & Hak Akses</h3>
                 <p class="text-xs text-slate-500 mb-6 font-medium ml-13">Atur PIN, Nama, dan Role spesifik untuk pengurus asrama.</p>
 
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
-                  <div class="md:col-span-5 bg-slate-50 p-5 rounded-2xl border border-slate-200 h-fit">
+                  <div class="md:col-span-5 bg-slate-50/70 p-5 rounded-2xl border border-slate-200/80 h-fit shadow-sm">
                     <h4 id="userFormTitle" class="font-bold text-slate-700 text-sm mb-4 border-b border-slate-200 pb-2">Tambah Pengguna Baru</h4>
                     <div class="space-y-4">
                       <input type="hidden" id="editUserOldPin">
@@ -812,14 +812,14 @@
                                Bisa kelola pengguna lain (Admin)
                             </label>
                             <label class="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
-                              <input type="checkbox" id="permKelolaJadwal" class="w-4 h-4 text-sky-500 rounded border-slate-300 focus:ring-sky-500"> 
-                               Bisa kelola Jadwal Asrama
+                              <input type="checkbox" id="permKelolaJadwal" class="w-4 h-4 text-sky-500 rounded border-slate-300 focus:ring-sky-500">
+                               Bisa kelola & generate Jadwal Asrama
                             </label>
                         </div>
                       </div>
 
                       <div class="flex gap-2 pt-2">
-                        <button onclick="simpanPenggunaAPI()" id="btnSimpanUser" class="w-full bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold py-2.5 rounded-xl transition shadow">
+                        <button onclick="simpanPenggunaAPI()" id="btnSimpanUser" class="w-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold py-3 rounded-xl transition shadow active:scale-[0.99] flex items-center justify-center gap-2">
                           Simpan Pengguna
                         </button>
                         <button id="btnCancelEditUser" onclick="resetFormUser()" class="hidden bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold px-3 py-2.5 rounded-xl transition">
@@ -830,7 +830,7 @@
                   </div>
 
                   <div class="md:col-span-7 overflow-x-auto">
-                    <table class="w-full text-left text-xs bg-white rounded-xl border border-slate-200 overflow-hidden">
+                    <table class="w-full text-left text-xs bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm">
                       <thead class="bg-slate-100 text-slate-500 font-bold uppercase">
                         <tr>
                           <th class="px-4 py-3 border-b border-slate-200">Nama Pengurus</th>
@@ -850,7 +850,7 @@
     </div>
 
     <!-- ================= BOTTOM NAV MOBILE ================= -->
-    <div class="lg:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-200 flex justify-center overflow-x-auto flex-nowrap hide-scroll p-2.5 z-40 pb-safe shadow-[0_-5px_15px_rgba(0,0,0,0.03)] gap-2">
+    <div class="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-200/80 flex justify-around overflow-x-auto flex-nowrap hide-scroll px-3 py-2 z-40 pb-safe shadow-[0_-8px_25px_rgba(15,23,42,0.06)]">
       <button id="tabBerandaMob" onclick="gantiTabApp('beranda')" class="text-emerald-600 flex flex-col items-center w-16 shrink-0 py-1 transition-colors"><i class="fa-solid fa-house text-lg mb-1"></i><span class="text-[9px] font-bold">Kas</span></button>
       <button id="tabHutangMob" onclick="gantiTabApp('hutang')" class="text-slate-400 hover:text-slate-600 flex flex-col items-center w-16 shrink-0 py-1 transition-colors"><i class="fa-solid fa-book text-lg mb-1"></i><span class="text-[9px] font-bold">Hutang</span></button>
       <button id="tabJadwalMob" onclick="gantiTabApp('jadwal')" class="text-slate-400 hover:text-slate-600 flex flex-col items-center w-16 shrink-0 py-1 transition-colors"><i class="fa-solid fa-calendar-days text-lg mb-1"></i><span class="text-[9px] font-bold">Jadwal</span></button>
@@ -858,7 +858,7 @@
       <button id="tabDisiplinMob" onclick="gantiTabApp('disiplin')" class="text-slate-400 hover:text-slate-600 flex flex-col items-center w-16 shrink-0 py-1 transition-colors"><i class="fa-solid fa-scale-balanced text-lg mb-1"></i><span class="text-[9px] font-bold">Disiplin</span></button>
     </div>
 
-    <button id="fabCatat" onclick="toggleModalPencatatan(true)" class="lg:hidden fixed bottom-20 right-5 w-14 h-14 bg-emerald-600 text-white rounded-full shadow-xl shadow-emerald-600/30 flex items-center justify-center text-2xl z-[50] hover:bg-emerald-500 hover:-translate-y-1 transition-all active:scale-95 border-2 border-white">
+    <button id="fabCatat" onclick="toggleModalPencatatan(true)" class="lg:hidden fixed bottom-20 right-5 w-14 h-14 bg-gradient-to-tr from-emerald-600 to-teal-500 text-white rounded-2xl shadow-xl shadow-emerald-600/30 flex items-center justify-center text-2xl z-[50] hover:shadow-emerald-600/50 hover:scale-105 active:scale-95 transition-all border border-white/40">
       <i class="fa-solid fa-plus"></i>
     </button>
 
@@ -866,7 +866,7 @@
 
   <!-- MODALS -->
   <div id="modalGlobalSearch" class="hidden fixed inset-0 z-[80] bg-slate-900/60 backdrop-blur-sm flex justify-center items-start pt-20 p-4 fade-in">
-    <div class="bg-white rounded-[2rem] w-full max-w-lg p-6 shadow-2xl border border-slate-100 flex flex-col max-h-[70vh]">
+    <div class="bg-white rounded-3xl w-full max-w-lg p-6 shadow-2xl border border-slate-200/80 flex flex-col max-h-[70vh]">
       <div class="flex items-center gap-3 pb-4 border-b border-slate-100">
         <i class="fa-solid fa-magnifying-glass text-emerald-500 text-lg"></i>
         <input type="text" id="globalSearchInput" oninput="jalankanGlobalSearch(this.value)" placeholder="Ketik nama santri (Cth: Budi)..." class="w-full text-sm font-bold text-slate-800 outline-none bg-transparent placeholder:text-slate-400 placeholder:font-normal">
@@ -880,7 +880,7 @@
 
   <div id="modalProker" class="hidden fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm flex justify-center items-center p-4 fade-in">
     <!-- Konten Modal Proker (Sesuai aslinya) -->
-    <div class="bg-white rounded-[2rem] w-full max-w-md p-7 shadow-2xl">
+    <div class="bg-white rounded-3xl w-full max-w-md p-7 shadow-2xl border border-slate-200/80">
       <div class="flex justify-between items-center mb-5">
         <h3 class="font-black text-slate-800 text-lg flex items-center"><div class="w-8 h-8 rounded-full bg-purple-50 text-purple-500 flex items-center justify-center mr-3 text-sm"><i class="fa-solid fa-plus"></i></div> Buat Proker Baru</h3>
         <button onclick="tutupModalProker()" class="text-slate-400 hover:text-rose-500 text-xl transition-colors bg-slate-50 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
@@ -926,7 +926,7 @@
   </div>
 
   <div id="modalAudit" class="hidden fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm flex justify-center items-center p-4 fade-in">
-    <div class="bg-white rounded-[2rem] w-full max-w-2xl p-7 shadow-2xl flex flex-col max-h-[80vh]">
+    <div class="bg-white rounded-3xl w-full max-w-2xl p-7 shadow-2xl border border-slate-200/80 flex flex-col max-h-[80vh]">
       <div class="flex justify-between items-center mb-5">
         <h3 class="font-black text-slate-800 text-lg flex items-center"><div class="w-8 h-8 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center mr-3 text-sm"><i class="fa-solid fa-clock-rotate-left"></i></div> Log Aktivitas Sistem</h3>
         <button onclick="tutupModalAudit()" class="text-slate-400 hover:text-rose-500 text-xl transition-colors bg-slate-50 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
@@ -952,7 +952,7 @@
   </div>
 
   <div id="modalSiswa" class="hidden fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm flex justify-center items-center p-4 fade-in">
-    <div class="bg-white rounded-[2rem] w-full max-w-lg p-7 shadow-2xl">
+    <div class="bg-white rounded-3xl w-full max-w-lg p-7 shadow-2xl border border-slate-200/80">
       <div class="flex justify-between items-center mb-5">
         <h3 class="font-black text-slate-800 text-lg flex items-center"><div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center mr-3 text-sm"><i class="fa-solid fa-users-gear"></i></div> Data Siswa</h3>
         <button onclick="tutupModalSiswa()" class="text-slate-400 hover:text-rose-500 text-xl transition-colors bg-slate-50 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
@@ -976,7 +976,7 @@
 
   <!-- MODAL MASTER KEDISIPLINAN -->
   <div id="modalMasterDisiplin" class="hidden fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm flex justify-center items-center p-4 fade-in">
-    <div class="bg-white rounded-[2rem] w-full max-w-lg p-7 shadow-2xl flex flex-col max-h-[85vh]">
+    <div class="bg-white rounded-3xl w-full max-w-lg p-7 shadow-2xl border border-slate-200/80 flex flex-col max-h-[85vh]">
       <div class="flex justify-between items-center mb-4">
         <h3 class="font-black text-slate-800 text-lg flex items-center"><div class="w-8 h-8 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center mr-3 text-sm"><i class="fa-solid fa-pen-to-square"></i></div> Kelola Jenis Pelanggaran</h3>
         <button onclick="tutupModalMasterDisiplin()" class="text-slate-400 hover:text-rose-500 text-xl transition-colors bg-slate-50 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
@@ -1009,7 +1009,7 @@
   </div>
 
 <div id="modalPembina" class="hidden fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm flex justify-center items-center p-4 fade-in">
-    <div class="bg-white rounded-[2rem] w-full max-w-lg p-7 shadow-2xl">
+    <div class="bg-white rounded-3xl w-full max-w-lg p-7 shadow-2xl border border-slate-200/80">
       <div class="flex justify-between items-center mb-5">
         <h3 class="font-black text-slate-800 text-lg flex items-center"><div class="w-8 h-8 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center mr-3 text-sm"><i class="fa-solid fa-user-tie"></i></div> Data Pembina</h3>
         <button onclick="tutupModalPembina()" class="text-slate-400 hover:text-rose-500 text-xl transition-colors bg-slate-50 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
@@ -1030,7 +1030,7 @@
   </div>
 
   <div id="modalPetugas" class="hidden fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm flex justify-center items-center p-4 fade-in">
-    <div class="bg-white rounded-[2rem] w-full max-w-lg p-7 shadow-2xl">
+    <div class="bg-white rounded-3xl w-full max-w-lg p-7 shadow-2xl border border-slate-200/80">
       <div class="flex justify-between items-center mb-5">
         <h3 class="font-black text-slate-800 text-lg flex items-center"><div class="w-8 h-8 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center mr-3 text-sm"><i class="fa-solid fa-list-check"></i></div> Petugas Jadwal</h3>
         <button onclick="tutupModalPetugas()" class="text-slate-400 hover:text-rose-500 text-xl transition-colors bg-slate-50 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
@@ -1049,7 +1049,7 @@
   </div>
 
   <div id="modalPengaturan" class="hidden fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm flex justify-center items-center p-4 fade-in">
-    <div class="bg-white rounded-[2rem] w-full max-w-lg p-7 shadow-2xl">
+    <div class="bg-white rounded-3xl w-full max-w-lg p-7 shadow-2xl border border-slate-200/80">
       <div class="flex justify-between items-center mb-5">
         <h3 class="font-black text-slate-800 text-lg flex items-center"><div class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center mr-3 text-sm"><i class="fa-solid fa-gear"></i></div> Pengaturan Kas</h3>
         <button onclick="tutupModalPengaturan()" class="text-slate-400 hover:text-rose-500 text-xl transition-colors bg-slate-50 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
@@ -1073,7 +1073,7 @@
   </div>
 
   <div id="modalCatat" class="hidden fixed inset-0 z-[70] bg-slate-900/60 backdrop-blur-sm flex justify-center items-end sm:items-center fade-in">
-    <div class="bg-white rounded-t-[2.5rem] sm:rounded-[2rem] w-full max-w-md p-7 shadow-2xl border-t border-white/50">
+    <div class="bg-white rounded-t-[2.5rem] sm:rounded-3xl w-full max-w-md p-7 shadow-2xl border border-slate-200/80">
       <div class="flex justify-between items-center mb-6">
         <h3 class="font-black text-slate-800 text-lg flex items-center"><div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center mr-3 text-sm"><i class="fa-solid fa-plus"></i></div> Transaksi Baru</h3>
         <button onclick="toggleModalPencatatan(false)" class="text-slate-400 hover:text-rose-500 text-xl transition-colors bg-slate-50 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
@@ -1129,7 +1129,7 @@
     </div>
   </div>
 
-  <div id="undoSnackbar" class="fixed bottom-[-100px] left-1/2 transform -translate-x-1/2 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center justify-between gap-6 transition-all duration-300 z-[100] text-xs font-medium min-w-[300px] border border-slate-800">
+  <div id="undoSnackbar" class="fixed bottom-[-100px] left-1/2 transform -translate-x-1/2 bg-slate-900/95 backdrop-blur-md text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center justify-between gap-6 transition-all duration-300 z-[100] text-xs font-medium min-w-[320px] border border-slate-700/60 shadow-slate-950/40">
     <span id="snackText" class="flex items-center"><i class="fa-solid fa-circle-check text-emerald-400 mr-2.5 text-lg"></i> Data dihapus.</span>
     <button id="snackUndoBtn" class="text-orange-400 font-black hover:text-orange-300 transition-colors tracking-wider uppercase bg-slate-800 px-4 py-2 rounded-xl border border-slate-700">BATAL (5s)</button>
   </div>
@@ -1481,7 +1481,7 @@
 
     let currentUserPin = localStorage.getItem('userPin');
     let currentUserName = "";
-    let currentUserPerms = { inputKas: false, hapusKas: false, kelolaSiswa: false, kelolaUser: false, kelolaHutang: false };
+    let currentUserPerms = { inputKas: false, hapusKas: false, kelolaSiswa: false, kelolaUser: false, kelolaHutang: false, kelolaJadwal: false };
     
     let prokerViewMode = 'grid';
     let rawDataPaginated = []; 
@@ -2287,7 +2287,7 @@ function resetFormUser() {
         }
 
         let htmlCard = `
-          <div class="p-3.5 rounded-xl border ${borderClass} shadow-sm kanban-card flex flex-col gap-2">
+          <div class="p-4 rounded-2xl border ${borderClass} shadow-sm hover:shadow-md transition-all duration-200 kanban-card flex flex-col gap-2.5">
             <div class="flex justify-between items-start gap-2">
               <h5 class="font-bold text-slate-700 text-xs leading-snug">${p.judul}</h5>
               <div class="flex gap-1 flex-wrap justify-end">${assigneeBadge}</div>
